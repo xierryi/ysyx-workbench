@@ -54,6 +54,8 @@ static int cmd_q(char *args) {
 
 static int cmd_help(char *args);
 
+static int cmd_si(char* args);
+
 static struct {
   const char *name;
   const char *description;
@@ -62,6 +64,7 @@ static struct {
   { "help", "Display information about all supported commands", cmd_help },
   { "c", "Continue the execution of the program", cmd_c },
   { "q", "Exit NEMU", cmd_q },
+  { "si", "Step into instruction, steps = N", cmd_si},
 
   /* TODO: Add more commands */
 
@@ -88,6 +91,43 @@ static int cmd_help(char *args) {
       }
     }
     printf("Unknown command '%s'\n", arg);
+  }
+  return 0;
+}
+
+static int cmd_si(char* args) {
+  /* extract the first argument*/
+  char *arg = strtok(NULL, " ");
+  char ch;
+
+  int i;
+  int len_arg;
+  int num_step = 0;
+
+  if(arg == NULL)
+    /* no argument given, default value*/
+    cpu_exec(1);
+  else {
+    len_arg = strlen(arg);
+    if(len_arg > 8) {
+      printf("Exceed maximum digit.\n");
+    }
+    else {
+      for(i = 0; i < len_arg; i ++) {
+        ch = arg[i];
+        if(ch >= '0' && ch <= '9') {
+          num_step = (ch - '0') + num_step * 10; 
+        }
+        else
+        {
+          printf("Unidentified argument.\n");
+          break;
+        }
+      }
+      if(i == len_arg) {
+        cpu_exec(num_step);
+      }
+    }
   }
   return 0;
 }
