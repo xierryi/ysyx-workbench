@@ -56,6 +56,8 @@ static int cmd_help(char *args);
 
 static int cmd_si(char* args);
 
+static int cmd_info(char* args);
+
 static struct {
   const char *name;
   const char *description;
@@ -65,6 +67,7 @@ static struct {
   { "c", "Continue the execution of the program", cmd_c },
   { "q", "Exit NEMU", cmd_q },
   { "si", "Step into instruction, steps = N", cmd_si},
+  { "info", "Display the state of reg or watch point info", cmd_info},
 
   /* TODO: Add more commands */
 
@@ -129,6 +132,35 @@ static int cmd_si(char* args) {
       }
     }
   }
+  return 0;
+}
+
+static int cmd_info(char* args) {
+  /* extract the first argument*/
+  char *arg = strtok(NULL, " ");
+
+  if(arg != NULL)
+  if(strlen(arg) == 1) {
+    switch (arg[0])
+    {
+    case 'r':
+      /* state of register */
+      isa_reg_display();
+      break;
+    case 'w':
+      /* info of watch point*/
+      break;
+    default:
+      printf("Unknown argument '%s'\n", arg);
+      printf("info r      display the state of regs\n");
+      printf("info w      display the info of watch point\n");
+      break;
+    }
+    return 0;
+  }
+  printf("Unknown argument '%s'\n", arg);
+  printf("info r      display the state of regs\n");
+  printf("info w      display the info of watch point\n");
   return 0;
 }
 
