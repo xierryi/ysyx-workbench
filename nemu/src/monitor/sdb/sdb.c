@@ -18,6 +18,7 @@
 #include <readline/readline.h>
 #include <readline/history.h>
 #include "sdb.h"
+#include <memory/paddr.h>
 
 static int is_batch_mode = false;
 
@@ -58,6 +59,8 @@ static int cmd_si(char* args);
 
 static int cmd_info(char* args);
 
+static int cmd_x(char* args);
+
 static struct {
   const char *name;
   const char *description;
@@ -68,6 +71,7 @@ static struct {
   { "q", "Exit NEMU", cmd_q },
   { "si", "Step into instruction, steps = N", cmd_si},
   { "info", "Display the state of reg or watch point info", cmd_info},
+  { "x", "Examine N 4-byte words in hexadecimal starting from address EXPR", cmd_x},
 
   /* TODO: Add more commands */
 
@@ -112,7 +116,7 @@ static int cmd_si(char* args) {
     cpu_exec(1);
   else {
     len_arg = strlen(arg);
-    if(len_arg > 8) {
+    if(len_arg > 10) {
       printf("Exceed maximum digit.\n");
     }
     else {
@@ -151,17 +155,82 @@ static int cmd_info(char* args) {
       /* info of watch point*/
       break;
     default:
-      printf("Unknown argument '%s'\n", arg);
+      printf("Argument required\n");
       printf("info r      display the state of regs\n");
       printf("info w      display the info of watch point\n");
       break;
     }
     return 0;
   }
-  printf("Unknown argument '%s'\n", arg);
+  printf("Argument required\n");
   printf("info r      display the state of regs\n");
   printf("info w      display the info of watch point\n");
   return 0;
+}
+
+static int cmd_x(char* args) {
+  /* extract two arguments*/
+  char *arg1 = strtok(NULL, " ");
+  char *arg2 = strtok(NULL, " ");
+
+  int num_words = 0;
+  int len_arg;
+  int i;
+  char ch;
+  word_t inst;
+
+  if(arg1 != NULL) {
+    /* filter first argument*/
+    len_arg = strlen(arg1); 
+    if(len_arg > 10) {
+      printf("Exceed maximum digit.\n");
+    }
+    else {
+      for (i = 0; i < len_arg; i++)
+      {
+        ch = arg1[i];
+        if(ch >= '0' && ch <= '9') {
+          /* get first argument*/
+          num_words = (ch - '0') + num_words * 10;
+        }
+        else
+        {
+          printf("Unidentified argument.\n");
+          break;
+        }
+      }
+      if(i == len_arg) {
+        /* filter second argument*/
+        //printf("arg2 = %s\n", arg2);
+        if(arg2 != NULL && strlen(arg2) == 8 + 2) {
+          if(arg2[0] == '0' && arg2[1] == 'x') {
+            /* prefix check*/
+            char exp_string[10];
+            strcpy(exp_string, arg2 + 2);
+
+
+            char *endptr;
+            word_t exp;
+            exp = (word_t)strtol(exp_string, &endptr, 16);
+            if(*endptr == '\0') {
+              word_t exp_index;
+              for(i = 0; i < num_words; i ++) {
+                exp_index = exp + 4 * i;
+                inst = paddr_read(exp_index, 4);
+                printf("0x%08x: 0x%02x 0x%02x 0x%02x 0x%02x\n", \
+                exp_index, (inst>>24) & 0xFF, (inst>>16) & 0xFF, (inst>>8) & 0xFF, inst & 0xFF);
+              }
+              return 0;
+            }
+          }
+        }
+      }
+    }
+  }
+  printf("Argument required or unidentified.\n" );
+  printf("x N EXPR        (Example: x 1 0x80000000)\n");
+  return 0;
+
 }
 
 void sdb_set_batch_mode() {
