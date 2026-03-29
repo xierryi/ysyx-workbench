@@ -61,6 +61,8 @@ static int cmd_info(char* args);
 
 static int cmd_x(char* args);
 
+static int cmd_test(char* args);
+
 static struct {
   const char *name;
   const char *description;
@@ -72,6 +74,7 @@ static struct {
   { "si", "Step into instruction, steps = N", cmd_si},
   { "info", "Display the state of reg or watch point info", cmd_info},
   { "x", "Examine N 4-byte words in hexadecimal starting from address EXPR", cmd_x},
+  { "test", "test for evaluate expression", cmd_test},
 
   /* TODO: Add more commands */
 
@@ -231,6 +234,17 @@ static int cmd_x(char* args) {
   printf("x N EXPR        (Example: x 1 0x80000000)\n");
   return 0;
 
+}
+
+static int cmd_test(char* args) {
+  printf("Test for evaluating expression.\n");
+  bool success;
+
+  char *arg = strtok(NULL, "#");
+  if(arg != NULL) {
+    expr(arg, &success);
+  }
+  return success;
 }
 
 void sdb_set_batch_mode() {
