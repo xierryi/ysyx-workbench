@@ -14,6 +14,7 @@
 ***************************************************************************************/
 
 #include <common.h>
+#include "../src/monitor/sdb/sdb.h"
 
 void init_monitor(int, char *[]);
 void am_init_monitor();
@@ -27,6 +28,29 @@ int main(int argc, char *argv[]) {
 #else
   init_monitor(argc, argv);
 #endif
+
+  /* Test expr*/
+  bool suceess = false;
+  FILE *fp = fopen("tools/gen-expr/input", "r");
+  assert(fp != NULL);
+
+  unsigned int result;
+  char express[65535];
+  #define NUM_EXP 10
+  unsigned int i = 0;
+  uint32_t expr_result = 0;
+  while(fscanf(fp, "%u %[^\n]", &result, express) == 2) {
+    expr_result = expr(express, &suceess);
+      if(result == expr_result) i ++;
+    
+    printf("结果: %u\n", expr_result);
+    printf("正确结果: %u\n", result);
+    printf("表达式: %s\n", express);
+    printf("---\n");
+  }
+  printf("rate: %d/%d\n", i, NUM_EXP);
+
+  //expr();
 
   /* Start engine. */
   engine_start();

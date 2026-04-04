@@ -20,6 +20,8 @@
  */
 #include <regex.h>
 
+#define LEN_TOKES 65535
+
 const int op_low_preced[] = {'+', '-', '*', '/'};
 
 enum {
@@ -75,7 +77,7 @@ typedef struct token {
   char str[32];
 } Token;
 
-static Token tokens[32] __attribute__((used)) = {};
+static Token tokens[LEN_TOKES] __attribute__((used)) = {};
 static int nr_token __attribute__((used))  = 0;
 
 static bool make_token(char *e) {
@@ -91,8 +93,8 @@ static bool make_token(char *e) {
         char *substr_start = e + position;
         int substr_len = pmatch.rm_eo;
 
-        Log("match rules[%d] = \"%s\" at position %d with len %d: %.*s",
-            i, rules[i].regex, position, substr_len, substr_len, substr_start);
+        // Log("match rules[%d] = \"%s\" at position %d with len %d: %.*s",
+        //     i, rules[i].regex, position, substr_len, substr_len, substr_start);
 
         position += substr_len;
 
@@ -194,16 +196,10 @@ static uint32_t eval(Token *p, Token *q) {
       /* From left to right*/
       for(Token *op = q; op >= p; op --) {
         /* order: +,-,*,/ */
-        if(op->type == 258)
-          printf("p->type = %d, q->type = %d, op_str = %s\n", p->type,q->type, op->str);
-        else {
-          printf("p->type = %d, q->type = %d, op_type = %d\n", p->type,q->type, op->type);
-        }
         if(op->type == ')') state_parens --;
         else if(op->type == '(') state_parens ++;
         else if(op->type == op_low_preced[i] && state_parens == 0)
         {
-          printf("in if\n");
           op_type = op->type;
           main_op = op;
 
@@ -242,10 +238,6 @@ word_t expr(char *e, bool *success) {
 
   /* TODO: Insert codes to evaluate the expression. */
   uint32_t result;
-  for (int i = 0; i < nr_token; i++)
-  {
-    printf("%d: tokens->type = %d, tokens->str = %s\n", i, tokens[i].type, tokens[i].str);
-  }
   
   //printf("tokens->type = %d, tokens->str = %s\n", tokens->type, tokens->str);
   /* left bound pointer, and right bound pointer minus '\0'*/
@@ -255,7 +247,7 @@ word_t expr(char *e, bool *success) {
   memset(tokens, 0, sizeof(tokens));
   nr_token = 0;
 
-  printf("result: %d\n", result);
+  printf("result: %u\n", result);
 
-  return 0;
+  return result;
 }

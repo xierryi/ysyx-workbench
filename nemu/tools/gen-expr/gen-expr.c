@@ -21,13 +21,12 @@
 #include <string.h>
 
 #define LEN_BUF 65535
-#define LEN_DIVI_BUF 65535
 
 int sign_divi_by_zero = 0;
 
 // this should be enough
 static char buf[LEN_BUF] = {};
-static char code_buf[65536 + 128] = {}; // a little larger than `buf`
+static char code_buf[LEN_BUF + 128] = {}; // a little larger than `buf`
 static char *code_format =
 "#include <stdio.h>\n"
 "int main() { "
@@ -39,13 +38,13 @@ static char *code_format =
 static void gen_num() {
   char str[20];
   sprintf(str, "%d", rand() % 100);
-  if((strlen(buf) + strlen(str)) < LEN_BUF)
+  if((strlen(buf) + strlen(str)) < LEN_BUF - 200)
   strcat(buf, str);
 }
 
 static void gen(char ch) {
   char str[] = {ch, '\0'};
-  if((strlen(buf) + strlen(str)) < LEN_BUF)
+  if((strlen(buf) + strlen(str)) < LEN_BUF - 200)
   strcat(buf, str);
 }
 
@@ -53,7 +52,7 @@ static void gen_rand_op() {
   const char operator[] = {'+', '-', '*', '/'};
   char rand_op = operator[rand() % 4];
   char str[] = {rand_op, '\0'};
-  if((strlen(buf) + strlen(str)) < LEN_BUF) {
+  if((strlen(buf) + strlen(str)) < LEN_BUF - 200) {
     strcat(buf, str);
   }
 }
@@ -95,117 +94,128 @@ static void gen_rand_expr() {
   }
 }
 
-static int figure_divi_zero(int i) {
-  static int check_state = 0;
-  static char sub_result[100];
-  static char code_sub_result[228];
-  memset(code_sub_result, 0, sizeof(code_sub_result));
-  memset(sub_result, 0, sizeof(sub_result));
-  static int state_parens = 0;
-  static int substr_start_index = 0;
-
-  int local_state_parens  = state_parens;
-  static int local_state_parens_2 = 0;
-  int local_substr_start_index = 0;
-
-  
-  // printf("%d: %d\n", i, check_state);
-  if(buf[i] == '/' && check_state != 2) { 
-    memset(sub_result, 0, sizeof(sub_result));
-    check_state = 1; 
-    return 0;
-  }
-  /* Figure token after division*/
-  if(check_state == 1) {
-    switch (buf[i])
-    {
-    case '0':
-      check_state = 0;
-      buf[i] ++;
-      return 2;
-      break;
-    case '(':
-      check_state = 2;
-      substr_start_index = i;
-      //local_substr_start_index = i;
-      break;
-    case ' ':
-      break;
-    default:
-      check_state = 0;
-      return 2;
-      break;
-    }
-  }
-  /* Surrounded by pair of parens*/
-  if(check_state == 2) {      
-    if(buf[i] == '(') state_parens ++;
-    else if(buf[i] == ')') state_parens --;
-
-    if(buf[i ] == '/') {
-      /* Store the start index of sub str */
-      local_substr_start_index = substr_start_index;
-      local_state_parens_2 = state_parens;
-      int j = 0;
-      check_state = 1;
-      
-      for (; j < 100; j ++)
-      {
-        if(figure_divi_zero(i + j) == 2) break;
-      }
-      substr_start_index = local_substr_start_index;
-    }
-    printf("buf[%d] = %c \t parens = %d \t local_parens = %d \t substr_start = %d, local%d, check_state = %d)\n", 
-    i, buf[i], state_parens, local_state_parens_2, substr_start_index, local_substr_start_index, check_state);
-    /* completely surrounded by pair of parens*/
-    if(local_state_parens_2 == state_parens && local_state_parens == state_parens + 1) {
-      strncpy(sub_result, buf + substr_start_index, i - substr_start_index + 1);
-      sub_result[i - substr_start_index + 1] = '\0';
-      //printf("%d: sub_result = %s\n", i, sub_result);
-      //check_state = 0;
-    }
-    if(state_parens == 0) check_state = 0;
-  }
-  /* evaluate express after division*/
-  if(sub_result[0] != '\0') {
-    sprintf(code_sub_result, code_format, sub_result);
-    //printf("%s\n", sub_result);
+/**
+ * Evaluate a sub-expression by compiling and running it
+ * @param expr The expression to evaluate
+ * @return The evaluated result
+ */
+static unsigned int evaluate_expression(const char *expr) {
+    char temp_code[5128];
+    sprintf(temp_code, code_format, expr);
+    
     FILE *fp = fopen("/tmp/.code_sub.c", "w");
     assert(fp != NULL);
-    fputs(code_sub_result, fp);
+    fputs(temp_code, fp);
     fclose(fp);
 
-    int ret = system("gcc /tmp/.code_sub.c -o /tmp/.expr_sub");
-    if (ret != 0) return 1;
+    int ret = system("gcc /tmp/.code_sub.c -o /tmp/.expr_sub 2>/dev/null");
+    if (ret != 0) return 1;  // Compilation error, assume non-zero
 
     fp = popen("/tmp/.expr_sub", "r");
     assert(fp != NULL);
 
-    unsigned int result;
-    ret = fscanf(fp, "%u", &result);
+    unsigned int result = 1;  // Default to non-zero
+    int items_read = fscanf(fp, "%u", &result);
     pclose(fp);
-
-    printf("sub_result:%u %s\n", result, sub_result);
-    if(result == 0) {
-      memset(buf + substr_start_index, ' ', strlen(sub_result) - 1);
-      memset(buf + substr_start_index + strlen(sub_result) - 1, '1', 1);
-    }
-    printf("buf = %s\n", buf);
-    memset(sub_result, 0, sizeof(sub_result));
-    memset(code_sub_result, 0, sizeof(code_sub_result));
-
-    return 2;
-  }
-  return 0;
+    
+    // If fscanf failed, return 1 (non-zero) to avoid false positive
+    if (items_read != 1) return 1;
+    
+    return result;
 }
 
-static void check_divi_zero() {
-  
-  for (int i = 0; buf[i] != '\0'; i++)
-  {
-    figure_divi_zero(i);
-  }
-  
+/**
+ * Recursively process expression to fix division by zero from inside out
+ * @param expr_start Start position in buf
+ * @param expr_len Length of expression to process
+ * @return 1 if any fix was applied
+ */
+static int fix_division_by_zero(int expr_start, int expr_len) {
+    int fixed = 0;
+    int i = 0;
+    
+    while (i < expr_len) {
+        // Look for division operator
+        if (buf[expr_start + i] == '/') {
+            // Found division operator, find the divisor
+            int divisor_start = i + 1;
+            
+            // Skip whitespace
+            while (divisor_start < expr_len && buf[expr_start + divisor_start] == ' ') {
+                divisor_start++;
+            }
+            
+            if (divisor_start >= expr_len) {
+                i++;
+                continue;
+            }
+            
+            // Case 1: Divisor is literal '0'
+            if (buf[expr_start + divisor_start] == '0') {
+                // Check if it's a standalone '0' (not part of 10, 20, etc.)
+                if (divisor_start + 1 >= expr_len || 
+                    buf[expr_start + divisor_start + 1] < '0' || 
+                    buf[expr_start + divisor_start + 1] > '9') {
+                    buf[expr_start + divisor_start] = '1';  // Change '0' to '1'
+                    fixed = 1;
+                    sign_divi_by_zero = 1;
+                }
+            }
+            // Case 2: Divisor is a parenthesized expression
+            else if (buf[expr_start + divisor_start] == '(') {
+                // Find the matching closing parenthesis for divisor
+                int depth = 1;
+                int divisor_end = divisor_start + 1;
+                while (divisor_end < expr_len && depth > 0) {
+                    if (buf[expr_start + divisor_end] == '(') depth++;
+                    else if (buf[expr_start + divisor_end] == ')') depth--;
+                    divisor_end++;
+                }
+                divisor_end--;  // Point to closing parenthesis
+                
+                int len = divisor_end - divisor_start + 1;
+                
+                // CRITICAL: First recursively process inside the divisor expression
+                // This ensures inner divisions are fixed before evaluating
+                if (fix_division_by_zero(expr_start + divisor_start + 1, len - 2)) {
+                    fixed = 1;
+                }
+                
+                // Extract and evaluate the (possibly fixed) divisor expression
+                char divisor_expr[5000] = {0};
+                strncpy(divisor_expr, buf + expr_start + divisor_start, len);
+                divisor_expr[len] = '\0';
+                
+                // Evaluate the divisor expression
+                unsigned int result = evaluate_expression(divisor_expr);
+                
+                // If divisor evaluates to zero, replace it with "1"
+                if (result == 0) {
+                    // Replace the entire parenthesized expression with "1"
+                    memset(buf + expr_start + divisor_start, ' ', len);
+                    buf[expr_start + divisor_start] = '1';
+                    fixed = 1;
+                    sign_divi_by_zero = 1;
+                }
+            }
+            // Case 3: Divisor is normal number or variable - nothing to do
+        }
+        i++;
+    }
+    
+    return fixed;
+}
+
+/**
+ * Main function to check and fix division by zero
+ * Scans the entire expression repeatedly until no more fixes are needed
+ */
+static void check_divi_zero(void) {
+    int len = strlen(buf);
+    // Keep processing until no more changes are made
+    while (fix_division_by_zero(0, len)) {
+        // Continue fixing
+    }
 }
 
 int main(int argc, char *argv[]) {
@@ -215,31 +225,54 @@ int main(int argc, char *argv[]) {
   if (argc > 1) {
     sscanf(argv[1], "%d", &loop);
   }
+  
   int i;
   for (i = 0; i < loop; i ++) {
-    gen_rand_expr();
-    memset(buf, 0, sizeof(buf));
-    strcpy(buf, "32/((1/((9-9)) / 0)) + 2");
-
-    check_divi_zero();
-
+    buf[0] = '\0';  // Clear buffer
+    gen_rand_expr();  // Generate random expression
+    
+    // For testing specific cases
+    if (i == 0) {
+      strcpy(buf, "32/((1/((9-9/1)) / 1)) + 2");
+    }
+    
+    //printf("Original: %s\n", buf);
+    
+    sign_divi_by_zero = 0;
+    check_divi_zero();  // Fix division by zero issues
+    
+    //printf("Fixed:    %s\n", buf);
+    
+    // Compile and run the fixed expression
     sprintf(code_buf, code_format, buf);
-
+    
     FILE *fp = fopen("/tmp/.code.c", "w");
     assert(fp != NULL);
     fputs(code_buf, fp);
     fclose(fp);
-
-    int ret = system("gcc /tmp/.code.c -o /tmp/.expr");
-    if (ret != 0) continue;
-
+    
+    int ret = system("gcc /tmp/.code.c -o /tmp/.expr 2>/dev/null");
+    if (ret != 0) {
+      printf("  -> Compilation failed!\n");
+      memset(buf, 0, sizeof(buf));
+      continue;
+    }
+    
     fp = popen("/tmp/.expr", "r");
     assert(fp != NULL);
-
-    unsigned int result;
-    ret = fscanf(fp, "%u", &result);
+    
+    unsigned int result = 0;
+    int items_read = fscanf(fp, "%u", &result);
     pclose(fp);
-
+    
+    if (items_read != 1) {
+      printf("Result:   (failed to read)\n");
+    }
+    
+    // if (sign_divi_by_zero) {
+    //   printf("  -> Division by zero was detected and fixed\n");
+    // }
+    //printf("\n");
     printf("%u %s\n", result, buf);
     memset(buf, 0, sizeof(buf));
   }
