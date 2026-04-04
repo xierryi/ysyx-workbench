@@ -20,6 +20,8 @@
  */
 #include <regex.h>
 
+const int op_low_preced[] = {'+', '-', '*', '/'};
+
 enum {
   TK_NOTYPE = 256, TK_EQ, TK_INTDEC
 
@@ -81,7 +83,6 @@ static bool make_token(char *e) {
   int i;
   regmatch_t pmatch;
 
-  nr_token = 0;
 
   while (e[position] != '\0') {
     /* Try all rules one by one. */
@@ -101,14 +102,23 @@ static bool make_token(char *e) {
          */
 
         switch (rules[i].token_type) {
+          case TK_NOTYPE: break;
           case '+': tokens[nr_token].type = '+'; nr_token ++; break;
           case '-': tokens[nr_token].type = '-'; nr_token ++; break;
           case '*': tokens[nr_token].type = '*'; nr_token ++; break;
           case '/': tokens[nr_token].type = '/'; nr_token ++; break;
-          case '{': tokens[nr_token].type = '{'; nr_token ++; break;
-          case '}': tokens[nr_token].type = '}'; nr_token ++; break;
+          case '(': tokens[nr_token].type = '('; nr_token ++; break;
+          case ')': tokens[nr_token].type = ')'; nr_token ++; break;
+          case TK_EQ: tokens[nr_token].type = TK_EQ; nr_token ++; break;
+          case TK_INTDEC: 
+            tokens[nr_token].type = TK_INTDEC;
+            if(substr_len > sizeof(tokens[nr_token].str)) Assert(0, "substr_len exceed dest len");
+            strncpy(tokens[nr_token].str, substr_start, substr_len);
 
-          default: break;//TODO();
+            nr_token ++;
+            break;
+
+          default: Assert(0, "ERROR");//TODO();
         }
 
         break;
@@ -124,6 +134,105 @@ static bool make_token(char *e) {
   return true;
 }
 
+static bool check_parentheses(Token *p, Token *q) {
+  /* state of parentheses matching
+   * left parens: +1 
+   * right parens: -1
+  */
+  int state_parens = 0;
+  /* whether surrounded by a matched pair of parentheses */
+  if (p->type == '(' && q->type == ')') {
+    /* eliminate error matching*/
+    for (Token *pos_parens = p; pos_parens <= q; pos_parens ++)
+    {
+      if (pos_parens->type == '(') state_parens ++;
+      else if (pos_parens->type == ')') state_parens --;
+
+      if (pos_parens < q && state_parens < 1) return false;
+    }
+    if (state_parens == 0) return true;
+  }
+  return false;
+}
+
+static uint32_t eval(Token *p, Token *q) {
+  if(p > q) {
+    Assert(0, "Bad expression");
+    return 0;
+    /* Bad expression*/
+  }
+  else if(p == q) {
+    /* Single token. 
+     * For now this token should be a number.
+     * Return the value of number.
+    */
+    return atoi(p->str);
+  }
+  else if(check_parentheses(p, q) == true) {
+    /* The expression is surrounded by a matched pair of parentheses.
+     * If that is a case, just throw away the parentheses.
+     */
+    
+    return eval(p + 1, q - 1);
+  }
+  else {
+    /* Find the main operator, which is the lowest precedence level */
+    /* state of parentheses matching
+    * left parens: +1 
+    * right parens: -1
+    */
+    int state_parens = 0;
+
+    Token *main_op = NULL;
+    int op_type = 0;
+    uint32_t val1, val2;
+
+    bool isbreak = false;
+
+    for (int i = 0; i < sizeof(op_low_preced); i++)
+    {
+      /* From left to right*/
+      for(Token *op = q; op >= p; op --) {
+        /* order: +,-,*,/ */
+        if(op->type == 258)
+          printf("p->type = %d, q->type = %d, op_str = %s\n", p->type,q->type, op->str);
+        else {
+          printf("p->type = %d, q->type = %d, op_type = %d\n", p->type,q->type, op->type);
+        }
+        if(op->type == ')') state_parens --;
+        else if(op->type == '(') state_parens ++;
+        else if(op->type == op_low_preced[i] && state_parens == 0)
+        {
+          printf("in if\n");
+          op_type = op->type;
+          main_op = op;
+
+          isbreak = true;
+          break;
+        }
+      }
+      if(isbreak == true) {
+        isbreak = false;
+        break;
+      }
+    }
+
+    /* evaluate sub-expression*/
+    val1 = eval(p, main_op - 1);
+    val2 = eval(main_op + 1, q);
+    
+    switch (op_type)
+    {
+      case '+': return val1 + val2; break;
+      case '-': return (val1 - val2 >= 0) ? val1 - val2 : 0; break;
+      case '*': return val1 * val2; break;
+      case '/': return val1 / val2; break;
+      
+      default: Assert(0, "Error operator type");
+    }
+  }
+}
+
 
 word_t expr(char *e, bool *success) {
   if (!make_token(e)) {
@@ -132,7 +241,21 @@ word_t expr(char *e, bool *success) {
   }
 
   /* TODO: Insert codes to evaluate the expression. */
-  TODO();
+  uint32_t result;
+  for (int i = 0; i < nr_token; i++)
+  {
+    printf("%d: tokens->type = %d, tokens->str = %s\n", i, tokens[i].type, tokens[i].str);
+  }
+  
+  //printf("tokens->type = %d, tokens->str = %s\n", tokens->type, tokens->str);
+  /* left bound pointer, and right bound pointer minus '\0'*/
+  result = eval(tokens, tokens + nr_token - 1);
+
+  /* clear buffer */
+  memset(tokens, 0, sizeof(tokens));
+  nr_token = 0;
+
+  printf("result: %d\n", result);
 
   return 0;
 }
