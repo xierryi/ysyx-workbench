@@ -191,20 +191,26 @@ static unsigned int eval(Token *p, Token *q) {
 
     bool isbreak = false;
 
-    for (int i = 0; i < sizeof(op_low_preced); i++)
+    for (int i = 0; i < sizeof(op_low_preced); i = i + 2)
     {
       /* From left to right*/
       for(Token *op = q; op >= p; op --) {
         /* order: +,-,*,/ */
+        // if(op->type == 258)
+        //   printf("p->type = %d, q->type = %d, op_str = %s\n", p->type,q->type, op->str);
+        // else {
+        //   printf("p->type = %d, q->type = %d, op_type = %d\n", p->type,q->type, op->type);
+        // }
         if(op->type == ')') state_parens --;
         else if(op->type == '(') state_parens ++;
-        else if(op->type == op_low_preced[i] && state_parens == 0)
-        {
-          op_type = op->type;
-          main_op = op;
+        else if(state_parens == 0) {
+          if(op->type == op_low_preced[i] || op->type == op_low_preced[i+1]) {
+            op_type = op->type;
+            main_op = op;
 
-          isbreak = true;
-          break;
+            isbreak = true;
+            break;
+          }
         }
       }
       if(isbreak == true) {
@@ -212,6 +218,7 @@ static unsigned int eval(Token *p, Token *q) {
         break;
       }
     }
+    //printf("main_op: %c\n", main_op->type);
 
     /* evaluate sub-expression*/
     val1 = eval(p, main_op - 1);
@@ -219,10 +226,10 @@ static unsigned int eval(Token *p, Token *q) {
     
     switch (op_type)
     {
-      case '+': return val1 + val2; break;
+      case '+': return (val1 + val2); break;
       case '-': return (val1 - val2 >= 0) ? val1 - val2 : 0; break;
-      case '*': return val1 * val2; break;
-      case '/': return val1 / val2; break;
+      case '*': return (val1 * val2); break;
+      case '/': return (val1 / val2); break;
       
       default: Assert(0, "Error operator type");
     }
@@ -239,7 +246,6 @@ word_t expr(char *e, bool *success) {
   /* TODO: Insert codes to evaluate the expression. */
   unsigned int result;
   
-  //printf("tokens->type = %d, tokens->str = %s\n", tokens->type, tokens->str);
   /* left bound pointer, and right bound pointer minus '\0'*/
   result = eval(tokens, tokens + nr_token - 1);
 
@@ -247,7 +253,7 @@ word_t expr(char *e, bool *success) {
   memset(tokens, 0, sizeof(tokens));
   nr_token = 0;
 
-  printf("result: %u\n", result);
+  //printf("result: %u\n", result);
 
   return result;
 }

@@ -41,12 +41,17 @@ int main(int argc, char *argv[]) {
   uint32_t expr_result = 0;
   while(fscanf(fp, "%u %[^\n]", &result, express) == 2) {
     expr_result = expr(express, &suceess);
-      if(result == expr_result) {printf("√");i ++;
+      if(result == expr_result) {
+        //printf("√\n");
+        i ++;
+      }
+      else {
+        printf("×××××××××××××××××××××\n");
     
     printf("结果: %u\n", expr_result);
     printf("正确结果: %u\n", result);
     printf("表达式: %s\n", express);
-    printf("---\n");
+    printf("---\n");}
   }
   printf("rate: %d/%d\n", i, NUM_EXP);
 
