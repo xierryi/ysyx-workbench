@@ -122,23 +122,19 @@ static void gen_nonzero_expr() {
     
     // Evaluate the generated expression
     unsigned int result = evaluate_expression(sub_expr);
+
+    // Extract the first non-space token of sub_expr
+    char *first_token = sub_expr;
+    while(*first_token == ' ') {
+        first_token ++;
+    }
     
-    // If result is zero, roll back and try again
-    if (result == 0) {
+    // If result is zero, or first non-space token is zero, roll back and try again
+    if (result == 0 || *first_token == '0') {
         buf[saved_len] = '\0';  // Roll back to before this expression
         sign_divi_by_zero = 1;   // Mark that we fixed division by zero
         gen_nonzero_expr();      // Try generating a different expression
     }
-}
-
-/**
- * Generate a parenthesized non-zero expression
- * Ensures the entire parenthesized expression evaluates to non-zero
- */
-static void gen_paren_nonzero_expr() {
-    gen('(');
-    gen_nonzero_expr();
-    gen(')');
 }
 
 /**
@@ -156,11 +152,9 @@ static void gen_rand_expr() {
             int len = strlen(buf);
             if (len > 0 && buf[len-1] == '/') {
                 // Division operator - generate non-zero divisor
-                if (rand() % 2 == 0) {
-                    gen_paren_nonzero_expr();
-                } else {
-                    gen_nonzero_expr();
-                }
+                gen('(');
+                gen_nonzero_expr();
+                gen(')');
             } else {
                 // Not division - generate normal expression
                 gen_rand_expr();
