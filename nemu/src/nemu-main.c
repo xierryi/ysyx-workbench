@@ -41,7 +41,7 @@ int main(int argc, char *argv[]) {
   uint32_t expr_result = 0;
   while(fscanf(fp, "%u %[^\n]", &result, express) == 2) {
     expr_result = expr(express, &suceess);
-      if(result == expr_result) i ++;
+      if(result == expr_result) {printf("√");i ++;
     
     printf("结果: %u\n", expr_result);
     printf("正确结果: %u\n", result);

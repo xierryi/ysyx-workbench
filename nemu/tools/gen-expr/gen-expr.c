@@ -30,14 +30,14 @@ static char code_buf[LEN_BUF + 128] = {}; // a little larger than `buf`
 static char *code_format =
 "#include <stdio.h>\n"
 "int main() { "
-"  unsigned result = %s; "
+"  unsigned int result = (unsigned)(%s); "
 "  printf(\"%%u\", result); "
 "  return 0; "
 "}";
 
 static void gen_num() {
   char str[20];
-  sprintf(str, "%d", rand() % 100);
+  sprintf(str, "%u", rand() % 100);
   if((strlen(buf) + strlen(str)) < LEN_BUF - 200)
   strcat(buf, str);
 }
@@ -73,11 +73,11 @@ static void gen_rand_space() {
 
 static void gen_rand_expr() {
   //buf[0] = '\0';
-  switch(rand() % 3) {
+  switch(rand() % 4) {
     case 0: 
-      gen_rand_space();
-      gen_num(); 
-      gen_rand_space();
+      gen_rand_expr(); 
+      gen_rand_op(); 
+      gen_rand_expr(); 
       break;
     case 1: 
       gen_rand_space();
@@ -87,9 +87,9 @@ static void gen_rand_expr() {
       gen_rand_space();
       break;
     default: 
-      gen_rand_expr(); 
-      gen_rand_op(); 
-      gen_rand_expr(); 
+      gen_rand_space();
+      gen_num(); 
+      gen_rand_space();
       break;
   }
 }

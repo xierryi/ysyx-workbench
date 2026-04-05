@@ -157,7 +157,7 @@ static bool check_parentheses(Token *p, Token *q) {
   return false;
 }
 
-static uint32_t eval(Token *p, Token *q) {
+static unsigned int eval(Token *p, Token *q) {
   if(p > q) {
     Assert(0, "Bad expression");
     return 0;
@@ -187,7 +187,7 @@ static uint32_t eval(Token *p, Token *q) {
 
     Token *main_op = NULL;
     int op_type = 0;
-    uint32_t val1, val2;
+    unsigned int val1, val2;
 
     bool isbreak = false;
 
@@ -237,7 +237,7 @@ word_t expr(char *e, bool *success) {
   }
 
   /* TODO: Insert codes to evaluate the expression. */
-  uint32_t result;
+  unsigned int result;
   
   //printf("tokens->type = %d, tokens->str = %s\n", tokens->type, tokens->str);
   /* left bound pointer, and right bound pointer minus '\0'*/
