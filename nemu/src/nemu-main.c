@@ -21,15 +21,7 @@ void am_init_monitor();
 void engine_start();
 int is_exit_status_bad();
 
-int main(int argc, char *argv[]) {
-  /* Initialize the monitor. */
-#ifdef CONFIG_TARGET_AM
-  am_init_monitor();
-#else
-  init_monitor(argc, argv);
-#endif
-
-  /* Test expr*/
+void expr_test() {
   bool suceess = false;
   FILE *fp = fopen("tools/gen-expr/input", "r");
   assert(fp != NULL);
@@ -56,6 +48,18 @@ int main(int argc, char *argv[]) {
   printf("rate: %d/%d\n", i, NUM_EXP);
 
   //expr();
+}
+
+int main(int argc, char *argv[]) {
+  /* Initialize the monitor. */
+#ifdef CONFIG_TARGET_AM
+  am_init_monitor();
+#else
+  init_monitor(argc, argv);
+#endif
+
+  /* Test expr*/
+  //expr_test();
 
   /* Start engine. */
   engine_start();

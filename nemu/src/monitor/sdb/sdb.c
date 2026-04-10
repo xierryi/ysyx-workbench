@@ -61,7 +61,7 @@ static int cmd_info(char* args);
 
 static int cmd_x(char* args);
 
-static int cmd_test(char* args);
+static int cmd_p(char* args);
 
 static struct {
   const char *name;
@@ -74,7 +74,7 @@ static struct {
   { "si", "Step into instruction, steps = N", cmd_si},
   { "info", "Display the state of reg or watch point info", cmd_info},
   { "x", "Examine N 4-byte words in hexadecimal starting from address EXPR", cmd_x},
-  { "test", "test for evaluate expression", cmd_test},
+  { "p", "Evaluate the value of the expression", cmd_p},
 
   /* TODO: Add more commands */
 
@@ -174,7 +174,7 @@ static int cmd_info(char* args) {
 static int cmd_x(char* args) {
   /* extract two arguments*/
   char *arg1 = strtok(NULL, " ");
-  char *arg2 = strtok(NULL, " ");
+  char *arg2 = strtok(NULL, "\0");
 
   int num_words = 0;
   int len_arg;
@@ -205,28 +205,31 @@ static int cmd_x(char* args) {
       if(i == len_arg) {
         /* filter second argument*/
         //printf("arg2 = %s\n", arg2);
-        if(arg2 != NULL && strlen(arg2) == 8 + 2) {
-          if(arg2[0] == '0' && arg2[1] == 'x') {
-            /* prefix check*/
-            char exp_string[10];
-            strcpy(exp_string, arg2 + 2);
+        static int idx = 1;
+        uint32_t buf = 0;
+        uint32_t exp = 0;
+        bool success;
 
+        if(arg2 != NULL) {
+          buf = expr(arg2, &success);
 
-            char *endptr;
-            word_t exp;
-            exp = (word_t)strtol(exp_string, &endptr, 16);
-            if(*endptr == '\0') {
-              word_t exp_index;
-              for(i = 0; i < num_words; i ++) {
-                exp_index = exp + 4 * i;
-                inst = paddr_read(exp_index, 4);
-                printf("0x%08x: 0x%02x 0x%02x 0x%02x 0x%02x\n", \
-                exp_index, (inst>>24) & 0xFF, (inst>>16) & 0xFF, (inst>>8) & 0xFF, inst & 0xFF);
-              }
-              return 0;
-            }
+          if(success == true) {
+            exp = buf; 
+            idx ++;
+          }
+          else {
+            printf("A syntax error in expression!\n");
+            return 0;
           }
         }
+        word_t exp_index;
+        for(i = 0; i < num_words; i ++) {
+          exp_index = exp + 4 * i;
+          inst = paddr_read(exp_index, 4);
+          printf("0x%08x: 0x%02x 0x%02x 0x%02x 0x%02x\n", \
+          exp_index, (inst>>24) & 0xFF, (inst>>16) & 0xFF, (inst>>8) & 0xFF, inst & 0xFF);
+        }
+        return 0;
       }
     }
   }
@@ -236,15 +239,24 @@ static int cmd_x(char* args) {
 
 }
 
-static int cmd_test(char* args) {
-  printf("Test for evaluating expression.\n");
+static int cmd_p(char* args) {
   bool success;
+  static int idx = 1;
+  unsigned int result;
 
-  char *arg = strtok(NULL, "#");
+  char *arg = strtok(NULL, "\0");
   if(arg != NULL) {
-    expr(arg, &success);
+    result = expr(arg, &success);
+
+    if(success == true) {
+      printf("$%d = %d\n", idx, result);
+      idx ++;
+    }
+    else {
+      printf("A syntax error in expression!\n");
+    }
   }
-  return success;
+  return 0;
 }
 
 void sdb_set_batch_mode() {

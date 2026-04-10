@@ -136,102 +136,123 @@ static bool make_token(char *e) {
   return true;
 }
 
-static bool check_parentheses(Token *p, Token *q) {
+static bool check_parentheses(Token *p, Token *q, bool* success) {
   /* state of parentheses matching
    * left parens: +1 
    * right parens: -1
   */
   int state_parens = 0;
-  /* whether surrounded by a matched pair of parentheses */
-  if (p->type == '(' && q->type == ')') {
-    /* eliminate error matching*/
-    for (Token *pos_parens = p; pos_parens <= q; pos_parens ++)
-    {
-      if (pos_parens->type == '(') state_parens ++;
-      else if (pos_parens->type == ')') state_parens --;
+  bool is_fake_surrounded = false;
+  
+  /* eliminate error matching*/
+  for (Token *pos_parens = p; pos_parens <= q; pos_parens ++)
+  {
+    if (pos_parens->type == '(') state_parens ++;
+    else if (pos_parens->type == ')') state_parens --;
 
-      if (pos_parens < q && state_parens < 1) return false;
-    }
-    if (state_parens == 0) return true;
+    /* exclude format like: () + ()*/
+    if (pos_parens < q && state_parens < 1) is_fake_surrounded = true;
   }
+  /* parentheses match fails */
+  if(state_parens != 0) {
+    *success = false;
+    printf("Parentheses do not match!\n");
+  }
+  /* whether surrounded by a matched pair of parentheses */
+  if (p->type == '(' && q->type == ')')
+  if (state_parens == 0 && is_fake_surrounded == false) return true;
+
   return false;
 }
 
-static unsigned int eval(Token *p, Token *q) {
-  if(p > q) {
-    Assert(0, "Bad expression");
-    return 0;
-    /* Bad expression*/
-  }
-  else if(p == q) {
-    /* Single token. 
-     * For now this token should be a number.
-     * Return the value of number.
-    */
-    return atoi(p->str);
-  }
-  else if(check_parentheses(p, q) == true) {
-    /* The expression is surrounded by a matched pair of parentheses.
-     * If that is a case, just throw away the parentheses.
-     */
-    
-    return eval(p + 1, q - 1);
-  }
+static unsigned int eval(Token *p, Token *q, bool *success) {
+  if(*success == false) return 0;
   else {
-    /* Find the main operator, which is the lowest precedence level */
-    /* state of parentheses matching
-    * left parens: +1 
-    * right parens: -1
-    */
-    int state_parens = 0;
+    if(p > q) {
+      //Assert(0, "Bad expression");
+      *success = false;
+      return 0;
+      /* Bad expression*/
+    }
+    else if(p == q) {
+      /* Single token. 
+      * For now this token should be a number.
+      * Return the value of number.
+      */
+      return atoi(p->str);
+    }
+    else if(check_parentheses(p, q, success) == true) {
+      /* The expression is surrounded by a matched pair of parentheses.
+      * If that is a case, just throw away the parentheses.
+      */
+      
+      return eval(p + 1, q - 1, success);
+    }
+    else {
+      /* Find the main operator, which is the lowest precedence level */
+      /* state of parentheses matching
+      * left parens: +1 
+      * right parens: -1
+      */
+      int state_parens = 0;
 
-    Token *main_op = NULL;
-    int op_type = 0;
-    unsigned int val1, val2;
+      Token *main_op = NULL;
+      int op_type = 0;
+      unsigned int val1, val2;
 
-    bool isbreak = false;
+      bool isbreak = false;
 
-    for (int i = 0; i < sizeof(op_low_preced); i = i + 2)
-    {
-      /* From left to right*/
-      for(Token *op = q; op >= p; op --) {
-        /* order: +,-,*,/ */
-        // if(op->type == 258)
-        //   printf("p->type = %d, q->type = %d, op_str = %s\n", p->type,q->type, op->str);
-        // else {
-        //   printf("p->type = %d, q->type = %d, op_type = %d\n", p->type,q->type, op->type);
-        // }
-        if(op->type == ')') state_parens --;
-        else if(op->type == '(') state_parens ++;
-        else if(state_parens == 0) {
-          if(op->type == op_low_preced[i] || op->type == op_low_preced[i+1]) {
-            op_type = op->type;
-            main_op = op;
+      for (int i = 0; i < sizeof(op_low_preced); i = i + 2)
+      {
+        /* From left to right*/
+        for(Token *op = q; op >= p; op --) {
+          /* order: +,-,*,/ */
+          // if(op->type == 258)
+          //   printf("p->type = %d, q->type = %d, op_str = %s\n", p->type,q->type, op->str);
+          // else {
+          //   printf("p->type = %d, q->type = %d, op_type = %d\n", p->type,q->type, op->type);
+          // }
+          if(op->type == ')') state_parens --;
+          else if(op->type == '(') state_parens ++;
+          else if(state_parens == 0) {
+            if(op->type == op_low_preced[i] || op->type == op_low_preced[i+1]) {
+              op_type = op->type;
+              main_op = op;
 
-            isbreak = true;
-            break;
+              isbreak = true;
+              break;
+            }
           }
         }
+        if(isbreak == true) {
+          isbreak = false;
+          break;
+        }
       }
-      if(isbreak == true) {
-        isbreak = false;
-        break;
-      }
-    }
-    //printf("main_op: %c\n", main_op->type);
+      //printf("main_op: %c\n", main_op->type);
 
-    /* evaluate sub-expression*/
-    val1 = eval(p, main_op - 1);
-    val2 = eval(main_op + 1, q);
-    
-    switch (op_type)
-    {
-      case '+': return (val1 + val2); break;
-      case '-': return (val1 - val2 >= 0) ? val1 - val2 : 0; break;
-      case '*': return (val1 * val2); break;
-      case '/': return (val1 / val2); break;
+      /* evaluate sub-expression*/
+      val1 = eval(p, main_op - 1, success);
+      val2 = eval(main_op + 1, q, success);
       
-      default: Assert(0, "Error operator type");
+      switch (op_type)
+      {
+        case '+': return (val1 + val2); break;
+        case '-': return (val1 - val2 >= 0) ? val1 - val2 : 0; break;
+        case '*': return (val1 * val2); break;
+        case '/': 
+          if(val2 == 0) {
+            printf("Zero can't used as a divisor!\n");
+            *success = false;
+            return 0;
+          }
+          else {
+            return val1/val2;
+          }
+          break;
+        
+        default: *success = false; return 0 ;break;
+      }
     }
   }
 }
@@ -247,7 +268,8 @@ word_t expr(char *e, bool *success) {
   unsigned int result;
   
   /* left bound pointer, and right bound pointer minus '\0'*/
-  result = eval(tokens, tokens + nr_token - 1);
+  *success = true;
+  result = eval(tokens, tokens + nr_token - 1, success);
 
   /* clear buffer */
   memset(tokens, 0, sizeof(tokens));
