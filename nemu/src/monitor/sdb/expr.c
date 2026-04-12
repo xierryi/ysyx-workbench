@@ -22,14 +22,55 @@
 
 #define LEN_TOKES 65535
 
-const int op_low_preced[] = {'+', '-', '*', '/'};
-
 enum {
-  TK_NOTYPE = 256, TK_EQ, TK_INTDEC
+  TK_NOTYPE = 256, TK_EQ, TK_NEQ, TK_LGAND, TK_LGOR, TK_INTDEC, TK_INTHEX, TK_REGVAL,
 
   /* TODO: Add more token types */
 
 };
+
+const int op_low_preced[][4] = {
+  {TK_LGOR},
+  {TK_LGAND}, 
+  {TK_EQ, TK_NEQ},
+  {'+', '-'},
+  {'*', '/'},
+};
+
+/* For reg name regex */
+char reg_name_regex[256];
+
+static void reg_name_config() {
+  char regex_buf[256] = "\\$(";
+  char temp[8];
+  bool first = true;
+  
+  // 从 isa.h 或外部获取 regs 数组
+  // 这里假设可以通过外部全局变量访问
+  extern const char *regs[];
+  extern int size;
+  
+  for (int i = 0; i < size; i++) {
+    if (!first) {
+      strcat(regex_buf, "|");
+    }
+    first = false;
+    
+    /* Be aware of $0 */
+    const char *p = regs[i];
+    if(*p == '$') {
+      sprintf(temp, "\\%s", regs[i]);
+    }
+    else
+    sprintf(temp, "%s", regs[i]);
+   
+    strcat(regex_buf, temp);
+  }
+  
+  strcat(regex_buf, ")");
+  
+  strcpy(reg_name_regex, regex_buf);  // 注意需要释放内存
+}
 
 static struct rule {
   const char *regex;
@@ -42,13 +83,18 @@ static struct rule {
 
   {" +", TK_NOTYPE},    // spaces
   {"\\+", '+'},         // plus
-  {"==", TK_EQ},        // equal
   {"-", '-'},           // minus
   {"\\*", '*'},         // times
   {"\\/", '/'},         // divide
   {"\\(", '('},         // left parens 
   {"\\)", ')'},         // right parens 
+  {"==", TK_EQ},        // equal
+  {"!=", TK_NEQ},       // not equal
+  {"&&", TK_LGAND},     // logical and
+  {"\\|\\|", TK_LGOR},  // logical or
+  {"0x[0-9a-fA-F]+", TK_INTHEX}, // hex integer, before decimal in order to figure 0 firstly
   {"[0-9]+", TK_INTDEC},// decimal integer 
+  {reg_name_regex, TK_REGVAL}, //reg value
 };
 
 #define NR_REGEX ARRLEN(rules)
@@ -62,6 +108,8 @@ void init_regex() {
   int i;
   char error_msg[128];
   int ret;
+
+  reg_name_config(); // To generate the rule of matching reg name 
 
   for (i = 0; i < NR_REGEX; i ++) {
     ret = regcomp(&re[i], rules[i].regex, REG_EXTENDED);
@@ -93,8 +141,8 @@ static bool make_token(char *e) {
         char *substr_start = e + position;
         int substr_len = pmatch.rm_eo;
 
-        // Log("match rules[%d] = \"%s\" at position %d with len %d: %.*s",
-        //     i, rules[i].regex, position, substr_len, substr_len, substr_start);
+        Log("match rules[%d] = \"%s\" at position %d with len %d: %.*s",
+            i, rules[i].regex, position, substr_len, substr_len, substr_start);
 
         position += substr_len;
 
@@ -112,13 +160,44 @@ static bool make_token(char *e) {
           case '(': tokens[nr_token].type = '('; nr_token ++; break;
           case ')': tokens[nr_token].type = ')'; nr_token ++; break;
           case TK_EQ: tokens[nr_token].type = TK_EQ; nr_token ++; break;
-          case TK_INTDEC: 
-            tokens[nr_token].type = TK_INTDEC;
+          case TK_NEQ: tokens[nr_token].type = TK_NEQ; nr_token ++; break;
+          case TK_LGAND: tokens[nr_token].type = TK_LGAND; nr_token ++; break;
+          case TK_LGOR: tokens[nr_token].type = TK_LGOR; nr_token ++; break;
+          case TK_INTHEX: tokens[nr_token].type = TK_INTHEX;
             if(substr_len > sizeof(tokens[nr_token].str)) Assert(0, "substr_len exceed dest len");
             strncpy(tokens[nr_token].str, substr_start, substr_len);
-
             nr_token ++;
             break;
+          case TK_INTDEC: tokens[nr_token].type = TK_INTDEC;
+            if(substr_len > sizeof(tokens[nr_token].str)) Assert(0, "substr_len exceed dest len");
+            strncpy(tokens[nr_token].str, substr_start, substr_len);
+            nr_token ++;
+            break;
+          case TK_REGVAL:
+            bool success; 
+            unsigned int reg_val = 0;
+
+            char reg_name[8];
+
+            substr_start ++; //ignore $
+            strncpy(reg_name, substr_start, substr_len - 1); // ignore $
+            reg_name[substr_len - 1] = '\0'; // prevent unpredictable error
+
+            reg_val = isa_reg_str2val(reg_name, &success);
+            if (success == true) {
+              tokens[nr_token].type = TK_REGVAL;
+              if(substr_len > sizeof(tokens[nr_token].str)) Assert(0, "substr_len exceed dest len");
+
+              char str[16];
+              sprintf(str, "%d", reg_val);
+              strncpy(tokens[nr_token].str, str, strlen(str));
+              nr_token ++;
+            }
+            else {
+              
+            }
+            break;
+            
 
           default: Assert(0, "ERROR");//TODO();
         }
@@ -132,6 +211,7 @@ static bool make_token(char *e) {
       return false;
     }
   }
+  printf("nr_token: %d\n", nr_token);
 
   return true;
 }
@@ -179,7 +259,8 @@ static unsigned int eval(Token *p, Token *q, bool *success) {
       * For now this token should be a number.
       * Return the value of number.
       */
-      return atoi(p->str);
+      char *endptr;
+      return (unsigned int)strtol(p->str, &endptr, 0);
     }
     else if(check_parentheses(p, q, success) == true) {
       /* The expression is surrounded by a matched pair of parentheses.
@@ -202,12 +283,12 @@ static unsigned int eval(Token *p, Token *q, bool *success) {
 
       bool isbreak = false;
 
-      for (int i = 0; i < sizeof(op_low_preced); i = i + 2)
+      for (int i = 0; i < sizeof(op_low_preced)/ sizeof(op_low_preced[0]); i ++)
       {
         /* From left to right*/
         for(Token *op = q; op >= p; op --) {
           /* order: +,-,*,/ */
-          // if(op->type == 258)
+          // if(op->type == TK_INTDEC || op->type == TK_INTHEX)
           //   printf("p->type = %d, q->type = %d, op_str = %s\n", p->type,q->type, op->str);
           // else {
           //   printf("p->type = %d, q->type = %d, op_type = %d\n", p->type,q->type, op->type);
@@ -215,11 +296,17 @@ static unsigned int eval(Token *p, Token *q, bool *success) {
           if(op->type == ')') state_parens --;
           else if(op->type == '(') state_parens ++;
           else if(state_parens == 0) {
-            if(op->type == op_low_preced[i] || op->type == op_low_preced[i+1]) {
-              op_type = op->type;
-              main_op = op;
+            for (int j = 0; op_low_preced[i][j] != 0; j++)
+            {
+              if(op->type == op_low_preced[i][j]){
+                op_type = op->type;
+                main_op = op;
 
-              isbreak = true;
+                isbreak = true;
+                break;
+              }
+            }
+            if(isbreak == true) {
               break;
             }
           }
@@ -250,6 +337,10 @@ static unsigned int eval(Token *p, Token *q, bool *success) {
             return val1/val2;
           }
           break;
+        case TK_EQ: return (val1 == val2); break;
+        case TK_NEQ: return (val1 != val2); break;
+        case TK_LGAND: return (val1 && val2); break;
+        case TK_LGOR: return (val1 || val2); break;
         
         default: *success = false; return 0 ;break;
       }
@@ -261,6 +352,10 @@ static unsigned int eval(Token *p, Token *q, bool *success) {
 word_t expr(char *e, bool *success) {
   if (!make_token(e)) {
     *success = false;
+    /* clear buffer */
+    memset(tokens, 0, sizeof(tokens));
+    nr_token = 0;
+
     return 0;
   }
 

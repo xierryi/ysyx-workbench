@@ -37,7 +37,12 @@ static char *code_format =
 
 static void gen_num() {
   char str[20];
-  sprintf(str, "%uU", rand() % 100);
+  switch(rand() % 2) {
+    case 0: sprintf(str, "%uU", rand() % 100); break;
+    case 1: sprintf(str, "0x%d", rand() % 100); break;
+    default: break;
+
+  }
   if((strlen(buf) + strlen(str)) < LEN_BUF - 200)
   strcat(buf, str);
 }
@@ -49,9 +54,8 @@ static void gen(char ch) {
 }
 
 static void gen_rand_op() {
-  const char operator[] = {'+', '-', '*', '/'};
-  char rand_op = operator[rand() % 4];
-  char str[] = {rand_op, '\0'};
+  const char operator_symbol[][3] = {"+", "-", "*", "/", "==", "!=", "&&", "||"};
+  const char *str = operator_symbol[rand() % 8];
   if((strlen(buf) + strlen(str)) < LEN_BUF - 200) {
     strcat(buf, str);
   }
@@ -209,7 +213,7 @@ int main(int argc, char *argv[]) {
         gen_rand_expr();
         /* TEST */
         //memset(buf, 0, sizeof(buf));
-        // strcpy(buf, "( 33)*(4) * 97     /(17)/31");
+        //strcpy(buf, "99* 19-(57)");
         // Compile and run the generated expression
         sprintf(code_buf, code_format, buf);
         

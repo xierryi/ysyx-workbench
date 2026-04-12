@@ -23,14 +23,24 @@ const char *regs[] = {
   "s8", "s9", "s10", "s11", "t3", "t4", "t5", "t6"
 };
 
+int size = sizeof(regs) / sizeof(char *);
+
 void isa_reg_display() {
   int i = 0;
-  for (i = 0; i < sizeof(regs)/sizeof(char *); i++)
+  for (i = 0; i < size; i++)
   {
     printf("%s\t\t0x%-8x\t%-d\n",regs[i], gpr(i), gpr(i));
   }
 }
 
 word_t isa_reg_str2val(const char *s, bool *success) {
+  for (int i = 0; i < size; i++)
+  {
+    if (strcmp(s, regs[i]) == 0) {
+      *success = true;
+      return gpr(i);
+    }
+  }
+  *success = false;
   return 0;
 }
