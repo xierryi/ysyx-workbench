@@ -211,6 +211,7 @@ static int cmd_x(char* args) {
         bool success;
 
         if(arg2 != NULL) {
+          /*evaluate the expression*/
           buf = expr(arg2, &success);
 
           if(success == true) {

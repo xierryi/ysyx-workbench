@@ -19,11 +19,13 @@
  * Type 'man regex' for more information about POSIX regex functions.
  */
 #include <regex.h>
+#include <memory/paddr.h>
+
 
 #define LEN_TOKES 65535
 
 enum {
-  TK_NOTYPE = 256, TK_EQ, TK_NEQ, TK_LGAND, TK_LGOR, TK_INTDEC, TK_INTHEX, TK_REGVAL,
+  TK_NOTYPE = 256, TK_EQ, TK_NEQ, TK_LGAND, TK_LGOR, TK_INTDEC, TK_INTHEX, TK_REGVAL, TK_DEREF,
 
   /* TODO: Add more token types */
 
@@ -35,6 +37,7 @@ const int op_low_preced[][4] = {
   {TK_EQ, TK_NEQ},
   {'+', '-'},
   {'*', '/'},
+  {TK_DEREF},
 };
 
 /* For reg name regex */
@@ -84,7 +87,7 @@ static struct rule {
   {" +", TK_NOTYPE},    // spaces
   {"\\+", '+'},         // plus
   {"-", '-'},           // minus
-  {"\\*", '*'},         // times
+  {"\\*", '*'},         // times or deref
   {"\\/", '/'},         // divide
   {"\\(", '('},         // left parens 
   {"\\)", ')'},         // right parens 
@@ -141,8 +144,9 @@ static bool make_token(char *e) {
         char *substr_start = e + position;
         int substr_len = pmatch.rm_eo;
 
-        Log("match rules[%d] = \"%s\" at position %d with len %d: %.*s",
-            i, rules[i].regex, position, substr_len, substr_len, substr_start);
+        /* for test */
+        // Log("match rules[%d] = \"%s\" at position %d with len %d: %.*s",
+        //     i, rules[i].regex, position, substr_len, substr_len, substr_start);
 
         position += substr_len;
 
@@ -211,7 +215,7 @@ static bool make_token(char *e) {
       return false;
     }
   }
-  printf("nr_token: %d\n", nr_token);
+  // printf("nr_token: %d\n", nr_token);
 
   return true;
 }
@@ -319,6 +323,7 @@ static unsigned int eval(Token *p, Token *q, bool *success) {
       //printf("main_op: %c\n", main_op->type);
 
       /* evaluate sub-expression*/
+      if(op_type != TK_DEREF)
       val1 = eval(p, main_op - 1, success);
       val2 = eval(main_op + 1, q, success);
       
@@ -341,6 +346,7 @@ static unsigned int eval(Token *p, Token *q, bool *success) {
         case TK_NEQ: return (val1 != val2); break;
         case TK_LGAND: return (val1 && val2); break;
         case TK_LGOR: return (val1 || val2); break;
+        case TK_DEREF: return (paddr_read(val2, 1)); break;
         
         default: *success = false; return 0 ;break;
       }
@@ -361,6 +367,19 @@ word_t expr(char *e, bool *success) {
 
   /* TODO: Insert codes to evaluate the expression. */
   unsigned int result;
+
+  /* DEREF figure*/
+  for (int i = 0; i < nr_token; i++)
+  {
+    if(tokens[i].type == '*' && (i == 0 || tokens[i - 1].type == '(' || \
+      tokens[i - 1].type == '+' || tokens[i - 1].type == '-' || \
+      tokens[i - 1].type == '*' || tokens[i - 1].type == '/' || \
+      tokens[i - 1].type == TK_LGAND || tokens[i - 1].type == TK_LGOR || \
+      tokens[i - 1].type == TK_EQ || tokens[i - 1].type == TK_NEQ  )) { 
+      tokens[i].type = TK_DEREF;
+    }
+  }
+  
   
   /* left bound pointer, and right bound pointer minus '\0'*/
   *success = true;
