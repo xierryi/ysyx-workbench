@@ -131,6 +131,19 @@ typedef struct token {
 static Token tokens[LEN_TOKES] __attribute__((used)) = {};
 static int nr_token __attribute__((used))  = 0;
 
+static void set_deref_tokens() {
+  for (int i = 0; i < nr_token; i++)
+  {
+    if(tokens[i].type == '*' && (i == 0 || tokens[i - 1].type == '(' || \
+      tokens[i - 1].type == '+' || tokens[i - 1].type == '-' || \
+      tokens[i - 1].type == '*' || tokens[i - 1].type == '/' || \
+      tokens[i - 1].type == TK_LGAND || tokens[i - 1].type == TK_LGOR || \
+      tokens[i - 1].type == TK_EQ || tokens[i - 1].type == TK_NEQ  )) { 
+      tokens[i].type = TK_DEREF;
+    }
+  }
+}
+
 static bool make_token(char *e) {
   int position = 0;
   int i;
@@ -369,17 +382,7 @@ word_t expr(char *e, bool *success) {
   unsigned int result;
 
   /* DEREF figure*/
-  for (int i = 0; i < nr_token; i++)
-  {
-    if(tokens[i].type == '*' && (i == 0 || tokens[i - 1].type == '(' || \
-      tokens[i - 1].type == '+' || tokens[i - 1].type == '-' || \
-      tokens[i - 1].type == '*' || tokens[i - 1].type == '/' || \
-      tokens[i - 1].type == TK_LGAND || tokens[i - 1].type == TK_LGOR || \
-      tokens[i - 1].type == TK_EQ || tokens[i - 1].type == TK_NEQ  )) { 
-      tokens[i].type = TK_DEREF;
-    }
-  }
-  
+  set_deref_tokens();
   
   /* left bound pointer, and right bound pointer minus '\0'*/
   *success = true;
