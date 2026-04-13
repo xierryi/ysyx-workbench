@@ -49,7 +49,6 @@ static void reg_name_config() {
   bool first = true;
   
   // 从 isa.h 或外部获取 regs 数组
-  // 这里假设可以通过外部全局变量访问
   extern const char *regs[];
   extern int size;
   

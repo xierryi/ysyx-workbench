@@ -25,6 +25,11 @@ static int is_batch_mode = false;
 void init_regex();
 void init_wp_pool();
 
+typedef struct watchpoint WP;
+void new_wp(char *str);
+void delete_wp(int N); 
+void wp_all_display();
+
 /* We use the `readline' library to provide more flexibility to read from stdin. */
 static char* rl_gets() {
   static char *line_read = NULL;
@@ -63,6 +68,10 @@ static int cmd_x(char* args);
 
 static int cmd_p(char* args);
 
+static int cmd_w(char* args);
+
+static int cmd_d(char* args);
+
 static struct {
   const char *name;
   const char *description;
@@ -75,6 +84,8 @@ static struct {
   { "info", "Display the state of reg or watch point info", cmd_info},
   { "x", "Examine N 4-byte words in hexadecimal starting from address EXPR", cmd_x},
   { "p", "Evaluate the value of the expression", cmd_p},
+  { "w", "Pause the program execution when the val of expr changes", cmd_w},
+  { "d", "Delete the watchpoint with the serial namber N", cmd_d},
 
   /* TODO: Add more commands */
 
@@ -156,6 +167,7 @@ static int cmd_info(char* args) {
       break;
     case 'w':
       /* info of watch point*/
+      wp_all_display();
       break;
     default:
       printf("Argument required\n");
@@ -255,6 +267,46 @@ static int cmd_p(char* args) {
     }
     else {
       printf("A syntax error in expression!\n");
+    }
+  }
+  return 0;
+}
+
+static int cmd_w(char* args) {
+  // unsigned int result;
+
+  char *arg = strtok(NULL, "\0");
+  if(arg != NULL) {
+    // result = expr(arg, &success);
+    new_wp(arg);
+  }
+  return 0;
+}
+
+static int cmd_d(char* args) {
+  char *arg = strtok(NULL, " ");
+  if(arg != NULL) {
+    int len_arg = strlen(arg);
+    if(len_arg > 10) {
+      printf("Exceed maximum digit.\n");
+    }
+    else {
+      int N = 0;
+      int i = 0;
+      for(; i < len_arg; i ++) {
+        char ch = arg[i];
+        if(ch >= '0' && ch <= '9') {
+          N = (ch - '0') + N * 10; 
+        }
+        else
+        {
+          printf("Unidentified argument.\n");
+          break;
+        }
+      }
+      if(i == len_arg) {
+        delete_wp(N);
+      }
     }
   }
   return 0;
