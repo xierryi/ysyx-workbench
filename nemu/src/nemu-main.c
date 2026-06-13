@@ -28,7 +28,7 @@ void expr_test() {
 
   unsigned int result;
   char express[65535];
-  #define NUM_EXP 10
+  #define NUM_EXP 500
   unsigned int i = 0;
   uint32_t expr_result = 0;
   while(fscanf(fp, "%u %[^\n]", &result, express) == 2) {
@@ -59,7 +59,7 @@ int main(int argc, char *argv[]) {
 #endif
 
   /* Test expr*/
-  //expr_test();
+  // expr_test();
 
   /* Start engine. */
   engine_start();

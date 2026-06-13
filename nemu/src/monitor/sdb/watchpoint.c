@@ -42,7 +42,6 @@ void init_wp_pool() {
   free_ = wp_pool; // unused
 }
 
-/* TODO: Implement the functionality of watchpoint */
 void new_wp(char *str) {
   bool success;
   unsigned int buf;
