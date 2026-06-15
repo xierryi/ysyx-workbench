@@ -291,7 +291,12 @@ static unsigned int eval(Token *p, Token *q, bool *success) {
       * Return the value of number.
       */
       char *endptr;
-      return (unsigned int)strtol(p->str, &endptr, 0);
+      if(p->type == TK_INTDEC || p->type == TK_INTHEX)
+        return (unsigned int)strtol(p->str, &endptr, 0);
+      else {
+        *success = false;
+        return 0;
+      }
     }
     else if(check_parentheses(p, q, success) == true) {
       /* The expression is surrounded by a matched pair of parentheses.
