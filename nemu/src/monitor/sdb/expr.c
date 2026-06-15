@@ -25,7 +25,8 @@
 #define LEN_TOKES 65535
 
 enum {
-  TK_NOTYPE = 256, TK_EQ, TK_NEQ, TK_LGAND, TK_LGOR, TK_INTDEC, TK_INTHEX, TK_REGVAL, TK_DEREF,
+  TK_NOTYPE = 256, TK_EQ, TK_NEQ, TK_LGAND, TK_LGOR, \
+  TK_INTDEC, TK_INTHEX, TK_REGVAL, TK_DEREF, TK_NEGA,
 
   /* TODO: Add more token types */
 
@@ -38,6 +39,7 @@ const int op_low_preced[][4] = {
   {'+', '-'},
   {'*', '/'},
   {TK_DEREF},
+  {TK_NEGA},
 };
 
 /* For reg name regex */
@@ -139,6 +141,19 @@ static void set_deref_tokens() {
       tokens[i - 1].type == TK_LGAND || tokens[i - 1].type == TK_LGOR || \
       tokens[i - 1].type == TK_EQ || tokens[i - 1].type == TK_NEQ  )) { 
       tokens[i].type = TK_DEREF;
+    }
+  }
+}
+
+static void set_nega_tokens() {
+  for (int i = 0; i < nr_token; i++)
+  {
+    if(tokens[i].type == '-' && (i == 0 || tokens[i - 1].type == '(' || \
+      tokens[i - 1].type == '+' || tokens[i - 1].type == '-' || \
+      tokens[i - 1].type == '*' || tokens[i - 1].type == '/' || \
+      tokens[i - 1].type == TK_LGAND || tokens[i - 1].type == TK_LGOR || \
+      tokens[i - 1].type == TK_EQ || tokens[i - 1].type == TK_NEQ  )) { 
+      tokens[i].type = TK_NEGA;
     }
   }
 }
@@ -295,7 +310,7 @@ static unsigned int eval(Token *p, Token *q, bool *success) {
 
       Token *main_op = NULL;
       int op_type = 0;
-      unsigned int val1, val2;
+      unsigned int val1 = 0, val2 = 0;
 
       bool isbreak = false;
 
@@ -335,7 +350,7 @@ static unsigned int eval(Token *p, Token *q, bool *success) {
       //printf("main_op: %c\n", main_op->type);
 
       /* evaluate sub-expression*/
-      if(op_type != TK_DEREF)
+      if(!(op_type == TK_NEGA || op_type == TK_DEREF)) 
       val1 = eval(p, main_op - 1, success);
       val2 = eval(main_op + 1, q, success);
       
@@ -359,6 +374,7 @@ static unsigned int eval(Token *p, Token *q, bool *success) {
         case TK_LGAND: return (val1 && val2); break;
         case TK_LGOR: return (val1 || val2); break;
         case TK_DEREF: return (paddr_read(val2, 1)); break;
+        case TK_NEGA: return (-val2); break;
         
         default: *success = false; return 0 ;break;
       }
@@ -381,6 +397,8 @@ word_t expr(char *e, bool *success) {
 
   /* DEREF figure*/
   set_deref_tokens();
+  /* NEGATIVE figure*/
+  set_nega_tokens();
   
   /* left bound pointer, and right bound pointer minus '\0'*/
   *success = true;

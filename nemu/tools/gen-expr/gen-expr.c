@@ -39,7 +39,7 @@ static void gen_num() {
   char str[20];
   switch(rand() % 2) {
     case 0: sprintf(str, "%uU", rand() % 100); break;
-    case 1: sprintf(str, "0x%d", rand() % 100); break;
+    case 1: sprintf(str, "0x%xU", rand() % 100); break;
     default: break;
 
   }
@@ -72,6 +72,21 @@ static void gen_rand_space() {
     default:
       gen_rand_space();
       break;
+    }
+}
+
+static void gen_nega() {
+    switch (rand() % 2)
+    {
+    case 0:
+        /* code */
+        break;
+    case 1:
+        gen('-');
+        break;
+    
+    default:
+        break;
     }
 }
 
@@ -168,11 +183,12 @@ static void gen_rand_expr() {
         case 1:  // Parenthesized expression
             gen_rand_space();
             gen('('); 
+            gen_nega();
             gen_rand_expr(); 
             gen(')'); 
             gen_rand_space();
             break;
-            
+        
         default:  // Number
             gen_rand_space();
             gen_num(); 

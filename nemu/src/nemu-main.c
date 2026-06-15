@@ -28,22 +28,23 @@ void expr_test() {
 
   unsigned int result;
   char express[65535];
-  #define NUM_EXP 500
+  #define NUM_EXP 10000
   unsigned int i = 0;
   uint32_t expr_result = 0;
   while(fscanf(fp, "%u %[^\n]", &result, express) == 2) {
     expr_result = expr(express, &suceess);
       if(result == expr_result) {
-        //printf("√\n");
+        // printf("√\n");
         i ++;
       }
       else {
         printf("×××××××××××××××××××××\n");
     
-    printf("结果: %u\n", expr_result);
-    printf("正确结果: %u\n", result);
-    printf("表达式: %s\n", express);
-    printf("---\n");}
+        printf("结果: %u\n", expr_result);
+        printf("正确结果: %u\n", result);
+        printf("表达式: %s\n", express);
+        printf("---\n");
+      }
   }
   printf("rate: %d/%d\n", i, NUM_EXP);
 
@@ -59,7 +60,7 @@ int main(int argc, char *argv[]) {
 #endif
 
   /* Test expr*/
-  // expr_test();
+  expr_test();
 
   /* Start engine. */
   engine_start();
