@@ -26,6 +26,10 @@ const char *regs[] = {
 int size = sizeof(regs) / sizeof(char *);
 
 void isa_reg_display() {
+  // pc reg
+  printf("pc\t\t0x%-8x\t%-d\n", cpu.pc, cpu.pc);
+
+  // gpr
   int i = 0;
   for (i = 0; i < size; i++)
   {
@@ -39,6 +43,10 @@ word_t isa_reg_str2val(const char *s, bool *success) {
     if (strcmp(s, regs[i]) == 0) {
       *success = true;
       return gpr(i);
+    }
+    else if (strcmp(s, "pc") == 0) {
+      *success = true;
+      return cpu.pc;
     }
   }
   *success = false;

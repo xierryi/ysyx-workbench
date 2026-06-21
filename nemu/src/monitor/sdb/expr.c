@@ -48,20 +48,19 @@ char reg_name_regex[256];
 static void reg_name_config() {
   char regex_buf[256] = "\\$(";
   char temp[8];
-  bool first = true;
   
   // 从 isa.h 或外部获取 regs 数组
   extern const char *regs[];
   extern int size;
   
+  strcat(regex_buf, "pc");
+
   for (int i = 0; i < size; i++) {
-    if (!first) {
-      strcat(regex_buf, "|");
-    }
-    first = false;
+    strcat(regex_buf, "|");
     
     /* Be aware of $0 */
     const char *p = regs[i];
+    // \\$0
     if(*p == '$') {
       sprintf(temp, "\\%s", regs[i]);
     }
@@ -291,7 +290,7 @@ static unsigned int eval(Token *p, Token *q, bool *success) {
       * Return the value of number.
       */
       char *endptr;
-      if(p->type == TK_INTDEC || p->type == TK_INTHEX)
+      if(p->type == TK_INTDEC || p->type == TK_INTHEX || p->type == TK_REGVAL)
         return (unsigned int)strtol(p->str, &endptr, 0);
       else {
         *success = false;
