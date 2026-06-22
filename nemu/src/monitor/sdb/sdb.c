@@ -88,8 +88,6 @@ static struct {
   { "w", "Pause the program execution when the val of expr changes", cmd_w},
   { "d", "Delete the watchpoint with the serial namber N", cmd_d},
 
-  /* TODO: Add more commands */
-
 };
 
 #define NR_CMD ARRLEN(cmd_table)
@@ -253,17 +251,67 @@ static int cmd_x(char* args) {
 
 }
 
+#define FORMAT_OCT 1
+#define FORMAT_HEX 2
+#define FORMAT_DEC 3
+#define FORMAT_UND 4
+
+void display_format(char* str, int *format_idx, bool *success) {
+  *format_idx = 0;
+  *success = true;
+
+  for (int i = 0; i < strlen(str); i++)
+  {
+    // capture the first non-space char
+    if(str[i] != ' ') {
+      if(str[i] == '/') {
+        if(str[i+1] == '\0') *success = false;
+        else {
+          switch (str[i+1])
+          {
+            case 'o': *format_idx = FORMAT_OCT; break;
+            case 'x': *format_idx = FORMAT_HEX; break;
+            case 'd': *format_idx = FORMAT_DEC; break;
+            case 'u': *format_idx = FORMAT_UND; break;
+            default: *success = false; break;
+          }
+          memmove(str, str + (i + 2), strlen(str + (i + 2)) + 1);
+        }
+      }
+      else {
+        *format_idx = FORMAT_DEC;
+      }
+      break;
+    }
+    /* code */
+  }
+  
+}
+
 static int cmd_p(char* args) {
-  bool success;
+  bool success = true;
   static int idx = 1;
+  int format_idx = 0;
   unsigned int result;
 
   char *arg = strtok(NULL, "\0");
   if(arg != NULL) {
-    result = expr(arg, &success);
+    // display format figure
+
+    display_format(arg, &format_idx, &success);
+    if(success == true) result = expr(arg, &success);
 
     if(success == true) {
-      printf("$%d = %d\n", idx, result);
+      switch (format_idx)
+      {
+        case FORMAT_OCT: printf("$%d = 0%o\n", idx, result); break;
+        case FORMAT_HEX: printf("$%d = 0x%x\n", idx, result); break;
+        case FORMAT_DEC: printf("$%d = %d\n", idx, result); break;
+        case FORMAT_UND: printf("$%d = %u\n", idx, result); break;
+      
+      default:
+        break;
+      }
       idx ++;
     }
     else {
