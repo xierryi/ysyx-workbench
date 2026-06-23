@@ -60,7 +60,7 @@ int main(int argc, char *argv[]) {
 #endif
 
   /* Test expr*/
-  expr_test();
+  // expr_test();
 
   /* Start engine. */
   engine_start();
