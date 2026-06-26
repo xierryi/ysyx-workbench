@@ -117,7 +117,7 @@ static int cmd_help(char *args) {
 
 static int cmd_si(char* args) {
   /* extract the first argument*/
-  char *arg = strtok(NULL, " ");
+  char *arg = strtok(NULL, "\0");
   char ch;
 
   int i;
