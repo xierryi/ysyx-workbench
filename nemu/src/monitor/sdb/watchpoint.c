@@ -111,10 +111,15 @@ bool diff_wp_val() {
 static void free_wp(WP *wp) {
   /* delete wp in head */
   WP *wp_last = head;
-  while (wp_last->next != wp) {
-    wp_last = wp_last->next;
+  if(wp_last == wp) {
+    head = NULL;
   }
-  wp_last->next = wp->next;
+  else {
+    while (wp_last->next != wp) {
+      wp_last = wp_last->next;
+    }
+    wp_last->next = wp->next;
+  }
 
   /* add into free_*/
   wp->next = free_;
