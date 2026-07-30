@@ -7,28 +7,24 @@
 
 #include "verilated.h"
 
+
 class Vexample__Syms;
 
-class Vexample___024root final : public VerilatedModule {
+class alignas(VL_CACHE_LINE_BYTES) Vexample___024root final {
   public:
 
-    // DESIGN SPECIFIC STATE
-    CData/*0:0*/ __VactContinue;
-    IData/*31:0*/ __VactIterCount;
-    VlTriggerVec<0> __VactTriggered;
-    VlTriggerVec<0> __VnbaTriggered;
-
     // INTERNAL VARIABLES
-    Vexample__Syms* const vlSymsp;
+    Vexample__Syms* vlSymsp;
+    const char* vlNamep;
 
     // CONSTRUCTORS
-    Vexample___024root(Vexample__Syms* symsp, const char* v__name);
+    Vexample___024root(Vexample__Syms* symsp, const char* namep);
     ~Vexample___024root();
     VL_UNCOPYABLE(Vexample___024root);
 
     // INTERNAL METHODS
     void __Vconfigure(bool first);
-} VL_ATTR_ALIGNED(VL_CACHE_LINE_BYTES);
+};
 
 
 #endif  // guard

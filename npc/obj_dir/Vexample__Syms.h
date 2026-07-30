@@ -17,7 +17,7 @@
 #include "Vexample___024root.h"
 
 // SYMS CLASS (contains all model state)
-class Vexample__Syms final : public VerilatedSyms {
+class alignas(VL_CACHE_LINE_BYTES) Vexample__Syms final : public VerilatedSyms {
   public:
     // INTERNAL STATE
     Vexample* const __Vm_modelp;
@@ -34,7 +34,7 @@ class Vexample__Syms final : public VerilatedSyms {
     ~Vexample__Syms();
 
     // METHODS
-    const char* name() { return TOP.name(); }
-} VL_ATTR_ALIGNED(VL_CACHE_LINE_BYTES);
+    const char* name() const { return TOP.vlNamep; }
+};
 
 #endif  // guard

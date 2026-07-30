@@ -1,4 +1,7 @@
 VERILATOR = verilator
+TOPNAME = example
+
+PROJ_PATH = $(shell pwd)
 
 # Generate C++ in executable form
 VERILATOR_FLAGS += -cc -exe
@@ -10,9 +13,15 @@ VERILATOR_FLAGS += -Wall
 VERILATOR_FLAGS += --build
 # Uses the number of threads in the current hardware
 VERILATOR_FLAGS += -j 0   
+# Specify the top file
+VERILATOR_FLAGS += --top-module $(TOPNAME)
 
 # Input files for Verilator
-VERILATOR_INPUT = csrc/main.cpp vsrc/example.v
+VSRC_DIR := $(abspath ./vsrc)
+VSRC := $(shell find $(VSRC_DIR) -name "*.v")
+CSRC := $(shell find $(abspath ./csrc) -name "main.cpp")
+
+VERILATOR_INPUT := $(VSRC) $(CSRC)
 
 default: sim
 

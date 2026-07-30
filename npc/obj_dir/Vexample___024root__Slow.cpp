@@ -2,24 +2,20 @@
 // DESCRIPTION: Verilator output: Design implementation internals
 // See Vexample.h for the primary calling header
 
-#include "verilated.h"
+#include "Vexample__pch.h"
 
-#include "Vexample__Syms.h"
-#include "Vexample___024root.h"
 
-void Vexample___024root___ctor_var_reset(Vexample___024root* vlSelf);
-
-Vexample___024root::Vexample___024root(Vexample__Syms* symsp, const char* v__name)
-    : VerilatedModule{v__name}
-    , vlSymsp{symsp}
+Vexample___024root::Vexample___024root(Vexample__Syms* symsp, const char* namep)
  {
+    vlSymsp = symsp;
+    vlNamep = strdup(namep);
     // Reset structure values
-    Vexample___024root___ctor_var_reset(this);
 }
 
 void Vexample___024root::__Vconfigure(bool first) {
-    if (false && first) {}  // Prevent unused
+    (void)first;  // Prevent unused variable warning
 }
 
 Vexample___024root::~Vexample___024root() {
+    VL_DO_DANGLING(std::free(const_cast<char*>(vlNamep)), vlNamep);
 }

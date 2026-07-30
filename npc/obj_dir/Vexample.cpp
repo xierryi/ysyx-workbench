@@ -1,8 +1,7 @@
 // Verilated -*- C++ -*-
 // DESCRIPTION: Verilator output: Model implementation (design independent parts)
 
-#include "Vexample.h"
-#include "Vexample__Syms.h"
+#include "Vexample__pch.h"
 #include "verilated_vcd_c.h"
 
 //============================================================
@@ -15,6 +14,8 @@ Vexample::Vexample(VerilatedContext* _vcontextp__, const char* _vcname__)
 {
     // Register model with the context
     contextp()->addModel(this);
+    contextp()->traceBaseModelCbAdd(
+        [this](VerilatedTraceBaseC* tfp, int levels, int options) { traceBaseModel(tfp, levels, options); });
 }
 
 Vexample::Vexample(const char* _vcname__)
@@ -49,19 +50,15 @@ void Vexample::eval_step() {
     vlSymsp->__Vm_activity = true;
     vlSymsp->__Vm_deleter.deleteAll();
     if (VL_UNLIKELY(!vlSymsp->__Vm_didInit)) {
-        vlSymsp->__Vm_didInit = true;
         VL_DEBUG_IF(VL_DBG_MSGF("+ Initial\n"););
         Vexample___024root___eval_static(&(vlSymsp->TOP));
         Vexample___024root___eval_initial(&(vlSymsp->TOP));
         Vexample___024root___eval_settle(&(vlSymsp->TOP));
+        vlSymsp->__Vm_didInit = true;
     }
-    // MTask 0 start
-    VL_DEBUG_IF(VL_DBG_MSGF("MTask0 starting\n"););
-    Verilated::mtaskId(0);
     VL_DEBUG_IF(VL_DBG_MSGF("+ Eval\n"););
     Vexample___024root___eval(&(vlSymsp->TOP));
     // Evaluate cleanup
-    Verilated::endOfThreadMTask(vlSymsp->__Vm_evalMsgQp);
     Verilated::endOfEval(vlSymsp->__Vm_evalMsgQp);
 }
 
@@ -70,7 +67,7 @@ void Vexample::eval_step() {
 bool Vexample::eventsPending() { return false; }
 
 uint64_t Vexample::nextTimeSlot() {
-    VL_FATAL_MT(__FILE__, __LINE__, "", "%Error: No delays in the design");
+    VL_FATAL_MT(__FILE__, __LINE__, "", "No delays in the design");
     return 0;
 }
 
@@ -87,7 +84,9 @@ const char* Vexample::name() const {
 void Vexample___024root___eval_final(Vexample___024root* vlSelf);
 
 VL_ATTR_COLD void Vexample::final() {
+    contextp()->executingFinal(true);
     Vexample___024root___eval_final(&(vlSymsp->TOP));
+    contextp()->executingFinal(false);
 }
 
 //============================================================
@@ -96,12 +95,18 @@ VL_ATTR_COLD void Vexample::final() {
 const char* Vexample::hierName() const { return vlSymsp->name(); }
 const char* Vexample::modelName() const { return "Vexample"; }
 unsigned Vexample::threads() const { return 1; }
+void Vexample::prepareClone() const { contextp()->prepareClone(); }
+void Vexample::atClone() const {
+    contextp()->threadPoolpOnClone();
+}
 std::unique_ptr<VerilatedTraceConfig> Vexample::traceConfig() const {
-    return std::unique_ptr<VerilatedTraceConfig>{new VerilatedTraceConfig{false, false, false}};
+    return std::unique_ptr<VerilatedTraceConfig>{new VerilatedTraceConfig{false}};
 };
 
 //============================================================
 // Trace configuration
+
+void Vexample___024root__trace_decl_types(VerilatedVcd* tracep);
 
 void Vexample___024root__trace_init_top(Vexample___024root* vlSelf, VerilatedVcd* tracep);
 
@@ -114,21 +119,22 @@ VL_ATTR_COLD static void trace_init(void* voidSelf, VerilatedVcd* tracep, uint32
             "Turning on wave traces requires Verilated::traceEverOn(true) call before time 0.");
     }
     vlSymsp->__Vm_baseCode = code;
-    tracep->scopeEscape(' ');
-    tracep->pushNamePrefix(std::string{vlSymsp->name()} + ' ');
+    tracep->pushPrefix(vlSymsp->name(), VerilatedTracePrefixType::SCOPE_MODULE);
+    Vexample___024root__trace_decl_types(tracep);
     Vexample___024root__trace_init_top(vlSelf, tracep);
-    tracep->popNamePrefix();
-    tracep->scopeEscape('.');
+    tracep->popPrefix();
 }
 
 VL_ATTR_COLD void Vexample___024root__trace_register(Vexample___024root* vlSelf, VerilatedVcd* tracep);
 
-VL_ATTR_COLD void Vexample::trace(VerilatedVcdC* tfp, int levels, int options) {
-    if (tfp->isOpen()) {
-        vl_fatal(__FILE__, __LINE__, __FILE__,"'Vexample::trace()' shall not be called after 'VerilatedVcdC::open()'.");
+VL_ATTR_COLD void Vexample::traceBaseModel(VerilatedTraceBaseC* tfp, int levels, int options) {
+    (void)levels; (void)options;
+    VerilatedVcdC* const stfp = dynamic_cast<VerilatedVcdC*>(tfp);
+    if (VL_UNLIKELY(!stfp)) {
+        vl_fatal(__FILE__, __LINE__, __FILE__,"'Vexample::trace()' called on non-VerilatedVcdC object;"
+            " use --trace-fst with VerilatedFst object, and --trace-vcd with VerilatedVcd object");
     }
-    if (false && levels && options) {}  // Prevent unused
-    tfp->spTrace()->addModel(this);
-    tfp->spTrace()->addInitCb(&trace_init, &(vlSymsp->TOP));
-    Vexample___024root__trace_register(&(vlSymsp->TOP), tfp->spTrace());
+    stfp->spTrace()->addModel(this);
+    stfp->spTrace()->addInitCb(&trace_init, &(vlSymsp->TOP), name(), false, 0);
+    Vexample___024root__trace_register(&(vlSymsp->TOP), stfp->spTrace());
 }
