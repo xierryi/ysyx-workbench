@@ -1,5 +1,5 @@
 VERILATOR = verilator
-TOPNAME = example
+TOPNAME = top
 
 PROJ_PATH = $(shell pwd)
 
@@ -38,6 +38,12 @@ sim:
 
 	@echo	
 	@echo "--RUN----------------------"
-	obj_dir/Vexample
+	obj_dir/Vtop
+
+clean:
+	rm -rf obj_dir/
 
 include ../Makefile
+
+.PHONY: clean
+
