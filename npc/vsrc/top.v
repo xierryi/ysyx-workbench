@@ -6,7 +6,7 @@ module top(
 );
 
 wire [31:0] d_pcreg;
-wire op_type;
+wire [2:0] op_encoded;
 wire [4:0] rd;
 // wire [4:0] rs2;
 
@@ -62,13 +62,13 @@ ysyx_26060173_IDU u2(
     .operand1(operand1),
     // .operand2(operand2),
     .operand3(operand3),
-    .op_type(op_type),
+    .op_encoded(op_encoded),
     .rd(rd)
     // .rs2(rs2),
 );
 
 ysyx_26060173_EXU u3(
-    .op_type(op_type),
+    .op_encoded(op_encoded),
     .operand1(operand1),
     // .operand2(operand2),
     .operand3(operand3),

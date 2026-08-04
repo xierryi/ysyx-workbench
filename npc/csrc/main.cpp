@@ -3,13 +3,12 @@
 #include "verilated.h"
 
 __uint32_t pmem[] = {
-  0x00100093, // ADDI x1, x0, 1
-  0x00208113, // ADDI x2, x1, 2
-  0x00310193, // ADDI x3, x2, 3
-  0xfff18213, // ADDI x4, x3, -1
-  0xffe20213, // ADDI x4, x4, -2
-  0x00120013, // ADDI x0, x4, 1
-  0x00100093, // ADDI x1, x0, 1
+  0x01400513,
+  0x010000e7,
+  0x00c000e7,
+  0x00c00067,
+  0x00a50513,
+  0x00008067,
 };
 
 __uint32_t pmem_read(__uint32_t pc) {
@@ -36,7 +35,7 @@ int main(int argc, char** argv) {
   //   top->clk = ~top->clk;
   //   top->eval();
   // }
-  for (int i = 0; i < 20; i++)
+  for (int i = 0; i < 40; i++)
   {
     top->inst = pmem_read(top->pc / 4);
     top->clk = ~top->clk;
