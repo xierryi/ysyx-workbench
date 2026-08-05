@@ -11,17 +11,25 @@ void npc_trap(int pc) {
 }
 
 __uint32_t pmem[] = {
-  0x01400513,
-  0x010000e7,
-  0x00c000e7,
-  0x00100073, // ebreak
-  0x00a50513,
-  0x00008067,
+  0x01400513, // addi	a0,zero,20
+  0x010000e7, // jalr	ra,16(zero) # 10 <fun>
+  0x00c000e7, // jalr	ra,12(zero) # c <halt>
+  0x00100073, // ebreak jalr	zero,12(zero) # c <halt>
+  0x00a50533, // add a0, a0, a0
+  0xfff50513, // addi a0, a0, -1
+  0x00002537, // lui a0, 2 << 12
+  0xfff50513, // addi a0, a0, -1
+  0x00008067, // jalr	zero,0(ra)
 };
 
-__uint32_t pmem_read(int pc) {
-  return pmem[pc];
+int pmem_read(int raddr) {
+  // Address alignment
+  return pmem[raddr & ~0x3];
 }
+// int pmem_read(int raddr) {
+//   // Address alignment
+//   return pmem[raddr];
+// }
 // int main() {
 //   while(1) {
 //     ysyx_20260173_top->inst = pmem_read(ysyx_20260173_top->pc);

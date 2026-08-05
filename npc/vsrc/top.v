@@ -15,14 +15,15 @@ wire [4:0] waddr;
 wire [31:0] wdata;
 // wire wen;
 wire [4:0] raddr1; 
-// wire [4:0] raddr2; 
+wire [4:0] raddr2; 
 wire [31:0] rdata1;
-// wire [31:0] rdata2;
+wire [31:0] rdata2;
 
+wire [31:0] M_raddr; 
 // output operand of IDU and 
 // input operand of EXU
 wire [31:0] operand1;
-// wire [31:0] operand2;
+wire [31:0] operand2;
 wire [31:0] operand3;
 
 // result of EXU
@@ -30,6 +31,9 @@ wire [31:0] result;
 
 // output of WBU 
 wire [31:0] dnpc;
+
+// output of LSU
+wire [31:0] M_rdata;
 
 ysyx_26060173_RegisterFile #(
     5,
@@ -41,9 +45,9 @@ ysyx_26060173_RegisterFile #(
     // .wen(wen),
     .wen(1),
     .raddr1(raddr1),
-    // .raddr2(raddr2),
-    .rdata1(rdata1)
-    // .rdata2(rdata2)
+    .raddr2(raddr2),
+    .rdata1(rdata1),
+    .rdata2(rdata2)
 );
 
 ysyx_26060173_IFU u1(
@@ -56,11 +60,11 @@ ysyx_26060173_IFU u1(
 ysyx_26060173_IDU u2(
     .inst(inst),
     .rdata1(rdata1),
-    // .rdata2(rdata2),
+    .rdata2(rdata2),
     .raddr1(raddr1),
-    // .raddr2(raddr2),
+    .raddr2(raddr2),
     .operand1(operand1),
-    // .operand2(operand2),
+    .operand2(operand2),
     .operand3(operand3),
     .op_encoded(op_encoded),
     .rd(rd)
@@ -71,21 +75,33 @@ ysyx_26060173_EXU u3(
     .clk(clk),
     .op_encoded(op_encoded),
     .operand1(operand1),
-    // .operand2(operand2),
+    .operand2(operand2),
     .operand3(operand3),
     .pc(pc),
-    // .rdata2(rdata2),
     .result(result),
+    .M_raddr(M_raddr),
     .dnpc(dnpc)
 );
 
 ysyx_26060173_WBU u4(
     .dnpc(dnpc),
     .rd(rd),
+    .op_encoded(op_encoded),
     .result(result),
+    .M_rdata(M_rdata),
     .waddr(waddr),
     .wdata(wdata),
     .d_pcreg(d_pcreg)
+);
+
+ysyx_26060173_LSU u5(
+    .valid(M_valid),
+    .wen(M_wen),
+    .waddr(_waddr),
+    .wdata(M_wdata),
+    .wmask(M_wdata),
+    .raddr(M_raddr),
+    .rdata(M_rdata)
 );
 
 always @(posedge clk) begin
