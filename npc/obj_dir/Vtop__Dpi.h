@@ -16,8 +16,8 @@ extern "C" {
 
 
     // DPI IMPORTS
-    // DPI import at /home/xierry/ysyx-workbench/npc/vsrc/top.v:8:29
-    extern int add(int a, int b);
+    // DPI import at /home/xierry/ysyx-workbench/npc/vsrc/ysyx_26060173_EXU.v:32:30
+    extern void npc_trap(int pc);
 
 #ifdef __cplusplus
 }

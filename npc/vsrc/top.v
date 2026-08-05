@@ -5,12 +5,6 @@ module top(
     output reg [31:0] pc
 );
 
-import "DPI-C" function int add (input int a, input int b);
-
-initial begin
-  $display("%x + %x = %x", 1, 2, add(1,2));
-end
-
 wire [31:0] d_pcreg;
 wire [3:0] op_encoded;
 wire [4:0] rd;
@@ -74,6 +68,7 @@ ysyx_26060173_IDU u2(
 );
 
 ysyx_26060173_EXU u3(
+    .clk(clk),
     .op_encoded(op_encoded),
     .operand1(operand1),
     // .operand2(operand2),

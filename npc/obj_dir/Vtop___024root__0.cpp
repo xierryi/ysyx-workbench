@@ -4,18 +4,14 @@
 
 #include "Vtop__pch.h"
 
-extern "C" int add(int a, int b);
+extern "C" void npc_trap(int pc);
 
-void Vtop___024root____Vdpiimwrap_top__DOT__add_TOP(IData/*31:0*/ a, IData/*31:0*/ b, IData/*31:0*/ &add__Vfuncrtn) {
-    VL_DEBUG_IF(VL_DBG_MSGF("+    Vtop___024root____Vdpiimwrap_top__DOT__add_TOP\n"); );
+void Vtop___024root____Vdpiimwrap_top__DOT__u3__DOT__npc_trap_TOP(IData/*31:0*/ pc) {
+    VL_DEBUG_IF(VL_DBG_MSGF("+    Vtop___024root____Vdpiimwrap_top__DOT__u3__DOT__npc_trap_TOP\n"); );
     // Body
-    int a__Vcvt;
-    a__Vcvt = a;
-    int b__Vcvt;
-    b__Vcvt = b;
-    int add__Vfuncrtn__Vcvt;
-    add__Vfuncrtn__Vcvt = add(a__Vcvt, b__Vcvt);
-    add__Vfuncrtn = (add__Vfuncrtn__Vcvt);
+    int pc__Vcvt;
+    pc__Vcvt = pc;
+    npc_trap(pc__Vcvt);
 }
 
 void Vtop___024root___eval_triggers_vec__ico(Vtop___024root* vlSelf) {
@@ -48,12 +44,16 @@ void Vtop___024root___ico_sequent__TOP__0(Vtop___024root* vlSelf) {
     Vtop__Syms* const __restrict vlSymsp VL_ATTR_UNUSED = vlSelf->vlSymsp;
     auto& vlSelfRef = std::ref(*vlSelf).get();
     // Body
-    vlSelfRef.top__DOT__u2__DOT__op_encoded = (1U & 
-                                               (- (IData)((IData)(
-                                                                  (0x00000067U 
-                                                                   == 
-                                                                   (0x0000707fU 
-                                                                    & vlSelfRef.inst))))));
+    vlSelfRef.top__DOT__u2__DOT__op_encoded = ((1U 
+                                                & (- (IData)((IData)(
+                                                                     (0x00000067U 
+                                                                      == 
+                                                                      (0x0000707fU 
+                                                                       & vlSelfRef.inst)))))) 
+                                               | (8U 
+                                                  & (- (IData)(
+                                                               (0x00100073U 
+                                                                == vlSelfRef.inst)))));
     vlSelfRef.top__DOT__u2__DOT__operand3 = (((- (IData)(
                                                          (vlSelfRef.inst 
                                                           >> 0x0000001fU))) 
@@ -159,6 +159,9 @@ void Vtop___024root___nba_sequent__TOP__0(Vtop___024root* vlSelf) {
     CData/*0:0*/ __VdlySet__top__DOT__u0__DOT__rf__v0;
     __VdlySet__top__DOT__u0__DOT__rf__v0 = 0;
     // Body
+    if ((8U == (IData)(vlSelfRef.top__DOT__u2__DOT__op_encoded))) {
+        Vtop___024root____Vdpiimwrap_top__DOT__u3__DOT__npc_trap_TOP(vlSelfRef.pc);
+    }
     __VdlySet__top__DOT__u0__DOT__rf__v0 = 0U;
     VL_WRITEF_NX("PC: %x\nrdata1: %x\nraddr1: %x\noperand3: %x\nwaddr: %x\nwdata: %x\n   \n",6
                  , '#',32,vlSelfRef.pc, '#',32,vlSelfRef.top__DOT__u0__DOT__rf
