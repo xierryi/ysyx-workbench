@@ -5,8 +5,14 @@ module top(
     output reg [31:0] pc
 );
 
+import "DPI-C" function int add (input int a, input int b);
+
+initial begin
+  $display("%x + %x = %x", 1, 2, add(1,2));
+end
+
 wire [31:0] d_pcreg;
-wire [2:0] op_encoded;
+wire [3:0] op_encoded;
 wire [4:0] rd;
 // wire [4:0] rs2;
 

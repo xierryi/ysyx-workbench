@@ -11,15 +11,17 @@ module ysyx_26060173_IDU(
     output [31:0] operand1,
     // output [31:0] operand2,
     output [31:0] operand3,
-    output [2:0] op_encoded,
+    output [3:0] op_encoded,
 
     // decode signal from inst
     output [4:0] rd
     // output [4:0] rs2,
 );
 
-parameter addi_encoded = 3'b000;
-parameter jalr_encoded = 3'b001;
+parameter addi_encoded = 4'b0000;
+parameter jalr_encoded = 4'b0001;
+
+parameter ebreak_encoded = 4'b1000;
 
 wire [4:0] rs1;
 // wire [4:0] rs2;
@@ -30,8 +32,10 @@ assign rs1 = inst[19:15];
 // assign rs2 = inst[24:20];
 assign imm = {{20{inst[31]}}, inst[31:20]};
 
-assign op_encoded = {3{(inst[14:12] == 0) && (inst[6:0] == 7'b0010011)}} & addi_encoded
-                  | {3{(inst[14:12] == 0) && (inst[6:0] == 7'b1100111)}} & jalr_encoded;
+assign op_encoded = {4{(inst[14:12] == 0) && (inst[6:0] == 7'b0010011)}} & addi_encoded
+                  | {4{(inst[14:12] == 0) && (inst[6:0] == 7'b1100111)}} & jalr_encoded
+
+                  | {4{(inst == 32'b100000000000001110011)}}             & ebreak_encoded;
 
 assign raddr1 = rs1;
 assign operand1 = rdata1;

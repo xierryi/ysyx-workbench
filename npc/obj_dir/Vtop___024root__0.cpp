@@ -4,6 +4,20 @@
 
 #include "Vtop__pch.h"
 
+extern "C" int add(int a, int b);
+
+void Vtop___024root____Vdpiimwrap_top__DOT__add_TOP(IData/*31:0*/ a, IData/*31:0*/ b, IData/*31:0*/ &add__Vfuncrtn) {
+    VL_DEBUG_IF(VL_DBG_MSGF("+    Vtop___024root____Vdpiimwrap_top__DOT__add_TOP\n"); );
+    // Body
+    int a__Vcvt;
+    a__Vcvt = a;
+    int b__Vcvt;
+    b__Vcvt = b;
+    int add__Vfuncrtn__Vcvt;
+    add__Vfuncrtn__Vcvt = add(a__Vcvt, b__Vcvt);
+    add__Vfuncrtn = (add__Vfuncrtn__Vcvt);
+}
+
 void Vtop___024root___eval_triggers_vec__ico(Vtop___024root* vlSelf) {
     VL_DEBUG_IF(VL_DBG_MSGF("+    Vtop___024root___eval_triggers_vec__ico\n"); );
     Vtop__Syms* const __restrict vlSymsp VL_ATTR_UNUSED = vlSelf->vlSymsp;

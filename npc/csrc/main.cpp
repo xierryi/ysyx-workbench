@@ -1,7 +1,9 @@
 #include <stdio.h>
 #include "Vtop.h"
 #include "verilated.h"
-
+#include "svdpi.h"
+#include "Vtop__Dpi.h"
+int add(int a, int b) { return a+b; }
 __uint32_t pmem[] = {
   0x01400513,
   0x010000e7,

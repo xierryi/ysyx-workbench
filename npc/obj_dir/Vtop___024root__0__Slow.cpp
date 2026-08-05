@@ -24,12 +24,16 @@ VL_ATTR_COLD void Vtop___024root___eval_initial(Vtop___024root* vlSelf) {
     Vtop___024root____Vm_traceActivitySetAll(vlSelf);
 }
 
+void Vtop___024root____Vdpiimwrap_top__DOT__add_TOP(IData/*31:0*/ a, IData/*31:0*/ b, IData/*31:0*/ &add__Vfuncrtn);
+
 VL_ATTR_COLD void Vtop___024root___eval_initial__TOP(Vtop___024root* vlSelf) {
     VL_DEBUG_IF(VL_DBG_MSGF("+    Vtop___024root___eval_initial__TOP\n"); );
     Vtop__Syms* const __restrict vlSymsp VL_ATTR_UNUSED = vlSelf->vlSymsp;
     auto& vlSelfRef = std::ref(*vlSelf).get();
     // Body
     vlSelfRef.top__DOT__u0__DOT__rf[0U] = 0U;
+    Vtop___024root____Vdpiimwrap_top__DOT__add_TOP(1U, 2U, vlSelfRef.top__DOT____VlemCall_0__add);
+    VL_WRITEF_NX("00000001 + 00000002 = %x\n",1, '~',32,vlSelfRef.top__DOT____VlemCall_0__add);
 }
 
 VL_ATTR_COLD void Vtop___024root___eval_final(Vtop___024root* vlSelf) {
