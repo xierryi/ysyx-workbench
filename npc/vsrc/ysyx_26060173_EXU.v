@@ -1,13 +1,17 @@
 module ysyx_26060173_EXU(
     input clk,
+    
+    // opcode encoded and operand from IDU
     input [3:0] op_encoded,
     input [31:0] operand1,
     input [31:0] operand2,
     input [31:0] operand3,
+
+    // input of execute for jalr and ebreak 
     input [31:0] pc,
 
+    // Memory interfaces
     input [31:0] M_rdata,
-
     output M_valid,
     output M_wen,
     output [31:0] M_raddr,
@@ -15,11 +19,13 @@ module ysyx_26060173_EXU(
     output [31:0] M_wdata,
     output [7:0] M_wmask,
 
+    // input of WBU
     output [31:0] result, // result -> wdata
     output [31:0] dnpc
 
 );
 
+/* opcode decoded module */
 parameter add_encoded  = 4'b0000;
 parameter addi_encoded = 4'b0001;
 parameter lui_encoded  = 4'b0010;
@@ -47,9 +53,12 @@ assign ebreak_en = (op_encoded == ebreak_encoded);
 
 /* M interfaces */
 assign M_valid = lw_en | lbu_en | sw_en | sb_en;
+
 // M_raddr handle module 
+
 assign M_raddr = (operand1 + operand3) & {32{lw_en | lbu_en}};
 assign M_raddr_shiftbit = M_raddr[1:0] << 3;
+
 // M_wxxxx handle module
 assign M_wen = sw_en | sb_en;
 assign M_waddr = (operand1 + operand3) & {32{sw_en | sb_en}};

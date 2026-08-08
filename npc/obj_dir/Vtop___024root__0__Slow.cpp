@@ -162,20 +162,15 @@ VL_ATTR_COLD void Vtop___024root___stl_sequent__TOP__0(Vtop___024root* vlSelf) {
                                                                     & (- (IData)(
                                                                                 (0x00100073U 
                                                                                 == vlSelfRef.top__DOT__inst)))))))))));
+    vlSelfRef.top__DOT__u3__DOT__M_wen = ((5U == (IData)(vlSelfRef.top__DOT__u2__DOT__op_encoded)) 
+                                          | (6U == (IData)(vlSelfRef.top__DOT__u2__DOT__op_encoded)));
     vlSelfRef.__VdfgRegularize_h6e95ff9d_0_2 = ((3U 
                                                  == (IData)(vlSelfRef.top__DOT__u2__DOT__op_encoded)) 
                                                 | (4U 
                                                    == (IData)(vlSelfRef.top__DOT__u2__DOT__op_encoded)));
-    vlSelfRef.top__DOT__u3__DOT__M_wen = ((5U == (IData)(vlSelfRef.top__DOT__u2__DOT__op_encoded)) 
-                                          | (6U == (IData)(vlSelfRef.top__DOT__u2__DOT__op_encoded)));
     vlSelfRef.__Vtableidx1 = vlSelfRef.top__DOT__u2__DOT__op_encoded;
     vlSelfRef.top__DOT__u2__DOT__op_type = Vtop__ConstPool__TABLE_h8eaafbfe_0
         [vlSelfRef.__Vtableidx1];
-    vlSelfRef.top__DOT__u3__DOT__M_wdata = (vlSelfRef.top__DOT__u0__DOT__rf
-                                            [(0x0000001fU 
-                                              & (vlSelfRef.top__DOT__inst 
-                                                 >> 0x00000014U))] 
-                                            & (- (IData)((IData)(vlSelfRef.top__DOT__u3__DOT__M_wen))));
     vlSelfRef.top__DOT__u2__DOT__operand3 = (((((- (IData)(
                                                            (vlSelfRef.top__DOT__inst 
                                                             >> 0x0000001fU))) 
@@ -227,7 +222,13 @@ VL_ATTR_COLD void Vtop___024root___stl_sequent__TOP__0(Vtop___024root* vlSelf) {
         Vtop___024root____Vdpiimwrap_top__DOT__u1__DOT__pmem_read_TOP(vlSelfRef.top__DOT__u3__DOT__M_raddr, vlSelfRef.__Vfunc_top__DOT__u5__DOT__pmem_read__2__Vfuncout);
         vlSelfRef.top__DOT__M_rdata = vlSelfRef.__Vfunc_top__DOT__u5__DOT__pmem_read__2__Vfuncout;
         if (vlSelfRef.top__DOT__u3__DOT__M_wen) {
-            Vtop___024root____Vdpiimwrap_top__DOT__u5__DOT__pmem_write_TOP(vlSelfRef.top__DOT__u3__DOT__M_waddr, vlSelfRef.top__DOT__u3__DOT__M_wdata, 
+            Vtop___024root____Vdpiimwrap_top__DOT__u5__DOT__pmem_write_TOP(vlSelfRef.top__DOT__u3__DOT__M_waddr, 
+                                                                           (vlSelfRef.top__DOT__u0__DOT__rf
+                                                                            [
+                                                                            (0x0000001fU 
+                                                                             & (vlSelfRef.top__DOT__inst 
+                                                                                >> 0x00000014U))] 
+                                                                            & (- (IData)((IData)(vlSelfRef.top__DOT__u3__DOT__M_wen)))), 
                                                                            ((0x0fU 
                                                                              & (- (IData)(
                                                                                 (5U 
@@ -377,7 +378,6 @@ VL_ATTR_COLD void Vtop___024root___ctor_var_reset(Vtop___024root* vlSelf) {
     vlSelf->top__DOT__u3__DOT__M_wen = VL_SCOPED_RAND_RESET_I(1, __VscopeHash, 5932320230445147276ull);
     vlSelf->top__DOT__u3__DOT__M_raddr = VL_SCOPED_RAND_RESET_I(32, __VscopeHash, 11188281265537036746ull);
     vlSelf->top__DOT__u3__DOT__M_waddr = VL_SCOPED_RAND_RESET_I(32, __VscopeHash, 7724367165059228144ull);
-    vlSelf->top__DOT__u3__DOT__M_wdata = VL_SCOPED_RAND_RESET_I(32, __VscopeHash, 1086205936943601278ull);
     vlSelf->top__DOT__u3__DOT__result = VL_SCOPED_RAND_RESET_I(32, __VscopeHash, 18191861765634538509ull);
     vlSelf->top__DOT__u3__DOT__dnpc = VL_SCOPED_RAND_RESET_I(32, __VscopeHash, 6483488620404914423ull);
     vlSelf->__Vfunc_top__DOT__u1__DOT__pmem_read__0__Vfuncout = 0;

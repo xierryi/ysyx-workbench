@@ -1,13 +1,13 @@
 module ysyx_26060173_IDU(
     input [31:0] inst,
 
+    // reg write enable
     output wen,
-    // read from reg and M
+    // read from reg 
     input [31:0] rdata1,
     input [31:0] rdata2,
     output [4:0] raddr1,
     output [4:0] raddr2,
-    // output [31:0] M_raddr,
 
     // output operand and ctrl signal to EXU
     output [31:0] operand1,
@@ -17,7 +17,6 @@ module ysyx_26060173_IDU(
 
     // decode signal from inst
     output [4:0] rd
-    // output [4:0] rs2,
 );
 
 /* opcode encoded module */
@@ -42,15 +41,16 @@ assign op_encoded = {4{(inst[31:25] == 0) && (inst[14:12] == 0) && (inst[6:0] ==
                   | {4{(inst == 32'b100000000000001110011)}}                                    & ebreak_encoded;
 
 /* opcode type module */
-// parameter R_type = 3'b000;
+wire [2:0] op_type;
+
+parameter R_type = 3'b000;
 parameter I_type = 3'b001;
 parameter S_type = 3'b010;
 // parameter B_type = 3'b011;
 parameter U_type = 3'b100;
-wire [2:0] op_type;
 
-assign op_type = // R_type & {3{(op_encoded == add_encoded )}} 
-                 I_type & {3{(op_encoded == addi_encoded) 
+assign op_type = R_type & {3{(op_encoded == add_encoded )}} 
+               | I_type & {3{(op_encoded == addi_encoded) 
                            | (op_encoded == jalr_encoded) 
                            | (op_encoded == lw_encoded) 
                            | (op_encoded == lbu_encoded) 
@@ -85,5 +85,5 @@ assign operand2 = rdata2;
 assign operand3 = imm;
 
 /* interfaces for LSU */
-assign wen = (op_type == I_type) || (op_type == U_type);
+assign wen = (op_type == R_type) || (op_type == I_type) || (op_type == U_type);
 endmodule
