@@ -38,7 +38,7 @@ sim:
 
 	@echo	
 	@echo "--RUN----------------------"
-	obj_dir/Vtop
+	obj_dir/Vtop $(IMG)
 
 clean:
 	rm -rf obj_dir/

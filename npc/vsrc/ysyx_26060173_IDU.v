@@ -68,7 +68,8 @@ wire [4:0] rs2;
 wire [31:0] imm;
 
 assign rd = inst[11:7];
-assign rs1 = inst[19:15];
+assign rs1 = inst[19:15] & {5{op_encoded != ebreak_encoded}} 
+           | 5'ha & {5{op_encoded == ebreak_encoded}}; // To monitor a0
 assign rs2 = inst[24:20];
 
 assign imm = {{20{inst[31]}}, inst[31:20]}             & {32{op_type == I_type}}

@@ -12,7 +12,7 @@ module ysyx_26060173_EXU(
 
     // Memory interfaces
     input [31:0] M_rdata,
-    output M_valid,
+    output M_ren,
     output M_wen,
     output [31:0] M_raddr,
     output [31:0] M_waddr,
@@ -52,10 +52,8 @@ assign jalr_en = (op_encoded == jalr_encoded);
 assign ebreak_en = (op_encoded == ebreak_encoded);
 
 /* M interfaces */
-assign M_valid = lw_en | lbu_en | sw_en | sb_en;
-
-// M_raddr handle module 
-
+// M_rxx handle module 
+assign M_ren = lw_en | lbu_en ;
 assign M_raddr = (operand1 + operand3) & {32{lw_en | lbu_en}};
 assign M_raddr_shiftbit = M_raddr[1:0] << 3;
 
@@ -84,11 +82,11 @@ assign dnpc = (pc + 4) & {32{~jalr_en}}
 
 
 /* ebreak match and execute module */
-import "DPI-C" function void npc_trap (input int pc);
+import "DPI-C" function void npc_trap (input int pc, input int halt_ret);
 always @(posedge clk) begin
     if(ebreak_en) begin
         // npc trap supported by DPI-C
-        npc_trap(pc);
+        npc_trap(pc, operand1);
     end
 end
 

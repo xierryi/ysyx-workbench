@@ -1,5 +1,5 @@
 module ysyx_26060173_LSU(
-    input valid,
+    input ren,
     input wen,
     input [31:0] waddr,
     input [31:0] wdata,
@@ -13,14 +13,14 @@ import "DPI-C" function void pmem_write(
   input int waddr, input int wdata, input byte wmask);
 
 always @(*) begin
-    if(valid) begin
+    if(ren) begin
         rdata = pmem_read(raddr);
-        if(wen) begin
-            pmem_write(waddr, wdata, wmask);
-        end
     end
     else begin
         rdata = 0;
+    end
+    if(wen) begin
+        pmem_write(waddr, wdata, wmask);
     end
 end
 

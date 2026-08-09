@@ -1,6 +1,8 @@
 module top(
     input clk,
-    input wen_pc 
+    input rst_pc,
+    input wen_pc,
+    input [31:0] d_init_pc
 );
 // output of IFU module
 wire [31:0] inst;
@@ -16,7 +18,7 @@ wire [31:0] rdata1;
 wire [31:0] rdata2;
 
 // LSU interfaces
-wire M_valid;
+wire M_ren;
 wire M_wen;
 wire [31:0] M_waddr;
 wire [31:0] M_wdata;
@@ -54,7 +56,9 @@ ysyx_26060173_RegisterFile #(
 
 ysyx_26060173_IFU u1(
     .clk(clk), 
+    .rst(rst_pc),
     .wen(wen_pc), 
+    .d_init(d_init_pc),
     .d_pcreg(d_pcreg), 
     .pc(pc),
     .inst(inst)
@@ -83,7 +87,7 @@ ysyx_26060173_EXU u3(
     .pc(pc),
     .M_rdata(M_rdata),
     .result(result),
-    .M_valid(M_valid),
+    .M_ren(M_ren),
     .M_wen(M_wen),
     .M_raddr(M_raddr),
     .M_waddr(M_waddr),
@@ -102,7 +106,7 @@ ysyx_26060173_WBU u4(
 );
 
 ysyx_26060173_LSU u5(
-    .valid(M_valid),
+    .ren(M_ren),
     .wen(M_wen),
     .waddr(M_waddr),
     .wdata(M_wdata),
@@ -112,7 +116,7 @@ ysyx_26060173_LSU u5(
 );
 
 /* test module */
-always @(posedge clk) begin
+// always @(posedge clk) begin
     // $display("PC: %x", pc);
     // $display("inst: %x", inst);
     // $display("rdata1: %x", rdata1);
@@ -133,6 +137,6 @@ always @(posedge clk) begin
     // $display("op_encoded: %d", op_encoded);
 
     // $display("   ");
-end
+// end
 
 endmodule
