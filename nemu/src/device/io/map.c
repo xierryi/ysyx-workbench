@@ -18,7 +18,7 @@
 #include <memory/vaddr.h>
 #include <device/map.h>
 
-#define DTRACE_ENABLED
+// #define DTRACE_ENABLED
 #define IO_SPACE_MAX (32 * 1024 * 1024)
 
 static uint8_t *io_space = NULL;
