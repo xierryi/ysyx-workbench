@@ -34,7 +34,26 @@ void *malloc(size_t size) {
   // Therefore do not call panic() here, else it will yield a dead recursion:
   //   panic() -> putchar() -> (glibc) -> malloc() -> panic()
 #if !(defined(__ISA_NATIVE__) && defined(__NATIVE_USE_KLIB__))
-  panic("Not implemented");
+  if(size == 0) {
+    return NULL;
+  }
+  else {
+    static bool is_first_call = true;
+    static char *hbrk = NULL; 
+    if(is_first_call) { 
+      uintptr_t start = ROUNDUP((uintptr_t)heap.start, 4); 
+      hbrk = (char *)start;
+      is_first_call = false;
+    }
+    size = (size_t)ROUNDUP(size, 4);
+    char *old = hbrk;
+    hbrk += size;
+    assert((uintptr_t)heap.start <= (uintptr_t)hbrk && (uintptr_t)hbrk < (uintptr_t)heap.end);
+    for (uintptr_t *p = (uintptr_t *)old; p != (uintptr_t *)hbrk; p ++) {
+      *p = 0;
+    }
+    return old;
+  }
 #endif
   return NULL;
 }

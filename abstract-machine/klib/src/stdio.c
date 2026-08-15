@@ -9,9 +9,10 @@ static int fmt2str(char *str, const char *fmt, va_list ap) {
   int str_len = 0;
   int d = 0;
   int x = 0x0;
+  char c;
   char *s;
-  #define LENGTH_TYPE 3
-  const char fmt_type[LENGTH_TYPE] = {'s', 'd', 'x'};
+  #define LENGTH_TYPE 4
+  const char fmt_type[LENGTH_TYPE] = {'c','s', 'd', 'x'}; 
   while (*fmt)
     switch (*fmt)
     {
@@ -37,6 +38,11 @@ static int fmt2str(char *str, const char *fmt, va_list ap) {
               if(placeholder_len > 2) {place_type = *(placeholder_r - 2);}
               switch (placeholder_type)
               {
+              case 'c':
+                c = va_arg(ap, int);
+                fmt += placeholder_len + 1;
+                *str ++ = c;
+                break;
               case 's':
                 s = va_arg(ap, char *);
                 fmt += placeholder_len + 1;
