@@ -30,7 +30,77 @@ enum {
 static uint8_t *sbuf = NULL;
 static uint32_t *audio_base = NULL;
 
+// static void audio_play(void *userdata, uint8_t *stream, int len){
+//   printf("reg_count:%d\n", audio_base[reg_count]);
+//   printf("len: %d\n",len);
+
+//   int nread = len; 
+//   static int play_pos = 0;
+//   if(audio_base[reg_count] < len) nread = audio_base[reg_count];
+//   // printf("nread:%d\n",nread);
+
+//   SDL_memcpy(stream, sbuf + play_pos, nread);
+//   audio_base[reg_count] -= nread;
+//   play_pos += nread;
+
+
+//   if(nread < len) memset(stream + nread, 0, (len - nread));
+// }
+
+static void audio_play(void *userdata, Uint8 *stream, int len) {
+  // printf("len:%d\n",len); 
+  //printf("count:%d\n", audio_base[reg_count]);
+    int nread = len;
+    static int play_pos = 0;
+    int sbuf_size = CONFIG_SB_SIZE; 
+    
+    // make sure play_pos in valid range
+    if (play_pos >= sbuf_size) {
+        play_pos = 0;  // or play_pos %= sbuf_size;
+    }
+    // printf("sbuf[0..7]: %02x %02x %02x %02x %02x %02x %02x %02x\n",
+    //        sbuf[play_pos + 0], sbuf[play_pos + 1], sbuf[play_pos + 2], sbuf[play_pos + 3],
+    //        sbuf[play_pos + 4], sbuf[play_pos + 5], sbuf[play_pos + 6], sbuf[play_pos + 7]);
+    // // read available data
+    int available = audio_base[reg_count];
+    if (available < len) {
+        nread = available;
+    }
+    // printf("nread:%d\n",nread);
+    if (nread > 0 && play_pos + nread <= sbuf_size) {
+        SDL_memcpy(stream, sbuf + play_pos, nread);
+        //printf("%d\n", play_pos);
+        play_pos += nread;
+        audio_base[reg_count] -= nread;
+    } else { // read at beginning if reads at end
+        nread = 0;
+        play_pos = 0;
+    }
+    
+    // mute
+    if (nread < len) {
+        SDL_memset(stream + nread, 0, len - nread);
+    }
+}
+
 static void audio_io_handler(uint32_t offset, int len, bool is_write) {
+  static int call_once = 1;
+  audio_base[reg_sbuf_size] = CONFIG_SB_SIZE;
+  if(audio_base[reg_init] && call_once) {
+    // printf("11111\n");
+    // audio_base[reg_count] = 0;
+    SDL_AudioSpec s = {};
+    s.freq = audio_base[reg_freq];
+    s.channels = audio_base[reg_channels];
+    s.samples = audio_base[reg_samples];
+    s.format = AUDIO_S16SYS;  // 假设系统中音频数据的格式总是使用16位有符号数来表示
+    s.callback = audio_play;
+    s.userdata = NULL;        // 不使用
+    SDL_InitSubSystem(SDL_INIT_AUDIO);
+    SDL_OpenAudio(&s, NULL);
+    SDL_PauseAudio(0);
+    call_once = 0;
+  }
 }
 
 void init_audio() {

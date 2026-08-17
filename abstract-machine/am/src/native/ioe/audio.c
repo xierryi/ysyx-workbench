@@ -17,7 +17,11 @@ void __am_audio_init() {
 
 static void audio_play(void *userdata, uint8_t *stream, int len) {
   int nread = len;
+  printf("len: %d\n", len);
+  printf("count:%d\n",count);
+  
   if (count < len) nread = count;
+  printf("nread:%d\n",nread);
   int b = 0;
   while (b < nread) {
     int n = read(rfd, stream, nread);
