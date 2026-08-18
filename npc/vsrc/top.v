@@ -116,7 +116,7 @@ ysyx_26060173_LSU u5(
 );
 
 /* test module */
-// always @(posedge clk) begin
+always @(posedge clk) begin
     // $display("PC: %x", pc);
     // $display("inst: %x", inst);
     // $display("rdata1: %x", rdata1);
@@ -137,6 +137,6 @@ ysyx_26060173_LSU u5(
     // $display("op_encoded: %d", op_encoded);
 
     // $display("   ");
-// end
+end
 
 endmodule

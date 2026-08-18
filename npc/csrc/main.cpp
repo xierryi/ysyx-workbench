@@ -4,50 +4,15 @@
 #include "svdpi.h"
 #include "Vtop__Dpi.h"
 #include <math.h>
+#include <sys/time.h>
 
 #define CONFIG_MBASE 0x80000000
 #define RESET_VECTOR 0x80000000
 
-uint32_t pmem[655350];
-// {
-//   0x00000413,
-//   0x80009137,
-//   0x00010113,
-//   0x800000b7,
-//   0x02008093,
-//   0x000080e7,
-//   0x00000513,
-//   0x00008067,
-//   0x80000537,
-//   0x04850513,
-//   0x00112423,
-//   0x800000b7,
-//   0x01808093,
-//   0x000080e7,
-//   0x80000237,
-//   0x03c20213,
-//   0x00020067,
-// }; 
-// {
-//    0x04402083, // lw x1, 0x44(x0)
-//   0x04404103, // lbu x2, 0x44(x0) 
-//   0x04504183, // lbu x3, 0x45(x0)
-//   0x04604203, // lbu x4, 0x46(x0)
-//   0x04704283, // lbu x5, 0x47(x0)
-//   0x00008013, // addi x0, 0(x1)
-//   0x00010013, // addi x0, 0(x2)
-//   0x00018013, // addi x0, 0(x3)
-//   0x00020013, // addi x0, 0(x4)
-//   0x00028013, // addi x0, 0(x5)
-//   0x00002023, // sw x0,  0(x0)
-//   0x00102023, // sw x1,  0(x0)
-//   0x00200223, // sb x2,  4(x0)
-//   0x003002a3, // sb x3,  5(x0) 
-//   0x00400323, // sb x4,  6(x0)
-//   0x005003a3, // sb x5,  7(x0)
-//   0x00100073, // ebreak
-//   0x12345678,
-// };
+#define SERIAL_ADDR 0x10000000U
+#define RTC_ADDR    0x10000048U
+
+uint32_t pmem[6553500];
 
 static char *img_file = NULL;
 
@@ -57,7 +22,10 @@ void load_img(int argc, char** argv) {
     printf("Error loading img 1.\n");
   }
   FILE *fp = fopen(img_file, "rb");
-
+  if(fp == NULL) {
+    printf("Error: Cannot open file %s\n", img_file);
+    return;
+  }
   fseek(fp, 0, SEEK_END);
   long size = ftell(fp);
   
@@ -93,14 +61,36 @@ int pmem_read(int raddr) {
   // Address alignment
   // return pmem[raddr & ~0x3];
   // printf("raddr:%x, (raddr - CONFIG_MBASE) >> 2:%x\n",raddr,(raddr - CONFIG_MBASE) >> 2);
+
+  /* us Get */
+  if(raddr == RTC_ADDR || raddr == (RTC_ADDR + 4)) {
+    struct timeval now;
+    gettimeofday(&now, NULL); 
+
+    uint64_t us = now.tv_sec * 1000000 + now.tv_usec;
+    if(raddr == RTC_ADDR) return (uint32_t)us;
+    if(raddr == RTC_ADDR + 4) return  (uint32_t)(us >> 32);
+  }
   return pmem[(raddr - CONFIG_MBASE) >> 2]; // avoid any shift in RTL
 }
-
 // store inst api
 void pmem_write(int waddr, int wdata, char wmask) {
   // 总是往地址为`waddr & ~0x3u`的4字节按写掩码`wmask`写入`wdata`
   // `wmask`中每比特表示`wdata`中1个字节的掩码,
   // 如`wmask = 0x3`代表只写入最低2个字节, 内存中的其它字节保持不变
+
+  /* SERIAL PART */
+  static int call_count_2 = 0; // call_count_2 is strange!! TO FIX ME
+  if(waddr == SERIAL_ADDR) 
+  { 
+    if(call_count_2 > 1) call_count_2 = 0; 
+    else call_count_2 ++;
+    // printf("call_count:%d\n",call_count);
+    if(!call_count_2)
+    putchar(wdata);   
+    return;
+  }
+
   unsigned wmask_buf = wmask;
   unsigned char wmask_byte[4];
   /* hex to binary */
@@ -115,9 +105,6 @@ void pmem_write(int waddr, int wdata, char wmask) {
   // printf("waddr:%x\twaddr - CONFIG_MBASE:%x\n", waddr, waddr - CONFIG_MBASE);
   pmem[(waddr - CONFIG_MBASE) >> 2] = (pmem[(waddr - CONFIG_MBASE) >> 2] & ~wmask_4byte) | ((wdata << one_pos * 8) & wmask_4byte);
   
-  // printf("one_pos: %d\n", one_pos);
-  // printf("pmem[%d]:%x\n",waddr, pmem[waddr >> 2]);
-  // printf("wmask: %x, wmask_4byte:%x\n",wmask,wmask_4byte);
 }
 
 void system_init(Vtop* top){
