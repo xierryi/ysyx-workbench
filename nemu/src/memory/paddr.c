@@ -24,6 +24,13 @@ static uint8_t *pmem = NULL;
 static uint8_t pmem[CONFIG_MSIZE] PG_ALIGN = {};
 #endif
 
+int mtrace_isnifetch;
+enum {
+  READ_MODE, WRITE_MODE,
+};
+
+extern bool g_print_step;
+
 uint8_t* guest_to_host(paddr_t paddr) { return pmem + paddr - CONFIG_MBASE; }
 paddr_t host_to_guest(uint8_t *haddr) { return haddr - pmem + CONFIG_MBASE; }
 
@@ -41,6 +48,33 @@ static void out_of_bound(paddr_t addr) {
       addr, PMEM_LEFT, PMEM_RIGHT, cpu.pc);
 }
 
+static void mtrace_log(paddr_t addr, word_t data, int len, int mode){
+  #if defined(CONFIG_MTRACE) && defined(CONFIG_MTRACE_BASE) && defined(CONFIG_MTRACE_SIZE)
+    if(addr >= CONFIG_MTRACE_BASE && addr <= CONFIG_MTRACE_BASE + CONFIG_MTRACE_SIZE
+    && g_print_step && mtrace_isnifetch) {
+      char buf[128] = {0};
+      char *p = buf;
+      p += snprintf(p, sizeof(buf), FMT_WORD ": ", addr);
+      p += snprintf(p, buf + sizeof(buf) - p, "%d 0x%x", data, data);
+      switch (mode)
+      {
+      case READ_MODE: 
+        p += snprintf(p, buf + sizeof(buf) - p, "\t[mtrace: read");
+        break;
+      case WRITE_MODE:
+        p += snprintf(p, buf + sizeof(buf) - p, "\t[mtrace: write");
+        break;
+      default: assert(0); break;
+      }
+      if(len == 1)
+      p += snprintf(p, buf + sizeof(buf) - p, " %d byte]", len);
+      else 
+      p += snprintf(p, buf + sizeof(buf) - p, " %d bytes]", len);
+      printf("%s\n",buf);
+    }
+  #endif
+}
+
 void init_mem() {
 #if   defined(CONFIG_PMEM_MALLOC)
   pmem = malloc(CONFIG_MSIZE);
@@ -51,14 +85,25 @@ void init_mem() {
 }
 
 word_t paddr_read(paddr_t addr, int len) {
-  if (likely(in_pmem(addr))) return pmem_read(addr, len);
+  if (likely(in_pmem(addr))) {
+    word_t data;
+    data = pmem_read(addr, len);
+    mtrace_log(addr, data, len, READ_MODE);
+    return data;
+  }
   IFDEF(CONFIG_DEVICE, return mmio_read(addr, len));
   out_of_bound(addr);
   return 0;
 }
 
 void paddr_write(paddr_t addr, int len, word_t data) {
-  if (likely(in_pmem(addr))) { pmem_write(addr, len, data); return; }
+  if (likely(in_pmem(addr))) { 
+    pmem_write(addr, len, data); 
+    mtrace_log(addr, data, len, WRITE_MODE);
+    return; 
+  }
   IFDEF(CONFIG_DEVICE, mmio_write(addr, len, data); return);
+  // #ifdef CONFIG_MTRACE
+  // #endif
   out_of_bound(addr);
 }
