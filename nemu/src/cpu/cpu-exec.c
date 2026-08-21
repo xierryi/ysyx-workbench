@@ -17,6 +17,7 @@
 #include <cpu/decode.h>
 #include <cpu/difftest.h>
 #include <locale.h>
+#include <iringbuf.h>
 
 /* The assembly code of instructions executed is only output to the screen
  * when the number of instructions executed is less than this value.
@@ -96,6 +97,8 @@ static void statistic() {
 }
 
 void assert_fail_msg() {
+  // IringBuf_output(32);
+  // free_IringBuf();
   isa_reg_display();
   statistic();
 }
@@ -117,6 +120,10 @@ void cpu_exec(uint64_t n) {
   uint64_t timer_end = get_time();
   g_timer += timer_end - timer_start;
 
+  if(nemu_state.state == NEMU_ABORT) {
+    IringBuf_output();
+    free_IringBuf();
+  }
   switch (nemu_state.state) {
     case NEMU_RUNNING: nemu_state.state = NEMU_STOP; break;
 

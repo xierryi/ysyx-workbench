@@ -220,7 +220,7 @@ static bool make_token(char *e) {
 
               char str[16];
               sprintf(str, "%d", reg_val);
-              strncpy(tokens[nr_token].str, str, strlen(str));
+              strcpy(tokens[nr_token].str, str);
               nr_token ++;
             }
             else {
