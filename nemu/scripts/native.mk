@@ -23,9 +23,12 @@ compile_git:
 $(BINARY):: compile_git
 
 # ARGS config
-ARGS += -l $(shell dirname $(IMAGE).elf)/nemu-log.txt
-ifeq ($(CONFIG_FTRACE), y)
-  ARGS += -e $(IMAGE).elf
+ifneq ($(IMAGE),)
+  ARGS += -l $(shell dirname $(IMAGE).elf)/nemu-log.txt
+  IMG = $(IMAGE).bin
+  ifeq ($(CONFIG_FTRACE), y)
+    ARGS += -e $(IMAGE).elf
+  endif
 endif
 
 # Some convenient rules
@@ -34,7 +37,7 @@ override ARGS ?= --log=$(BUILD_DIR)/nemu-log.txt
 override ARGS += $(ARGS_DIFF)
 
 # Command to execute NEMU
-IMG = $(IMAGE).bin
+IMG ?= 
 NEMU_EXEC := $(BINARY) $(ARGS)
 
 run-env: $(BINARY) $(DIFF_REF_SO)
