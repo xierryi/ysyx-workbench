@@ -5,10 +5,14 @@
 
 #if !defined(__ISA_NATIVE__) || defined(__NATIVE_USE_KLIB__)
 
+static int my_abs(int input) {
+  return (input >= 0) ? input : -input;
+}
+
 static int fmt2str(char *str, const char *fmt, va_list ap) { 
   int str_len = 0;
-  int d = 0;
-  int x = 0x0;
+  int d = 0; 
+  unsigned int x = 0x0;
   char c;
   char *s;
   #define LENGTH_TYPE 4
@@ -56,14 +60,13 @@ static int fmt2str(char *str, const char *fmt, va_list ap) {
                 fmt += placeholder_len + 1;
                 if(d < 0) {
                   *str++ = '-'; 
-                  d = -d;
                   str_len ++;
                 }
                 char buf_d[32] = {};
                 int i = 0;
                 do {
-                  buf_d[i] = d % 10 + 48;
-                  d /= 10;
+                  buf_d[i] = my_abs(d % 10) + 48;
+                  d = my_abs(d / 10);
                   i ++;
                 } while(d);
                 if(i < fmt_len) {
@@ -80,6 +83,10 @@ static int fmt2str(char *str, const char *fmt, va_list ap) {
               case 'x':
                 x = va_arg(ap, int);
                 fmt += placeholder_len + 1;
+                // if(x < 0) {
+                //   x = 0xffffffff -(x + 1);
+                // }
+                x = (unsigned int)x;
                 char buf_x[32] = {};  
                 i = 0;
                 do {
