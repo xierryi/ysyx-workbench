@@ -6,7 +6,7 @@
 #if !defined(__ISA_NATIVE__) || defined(__NATIVE_USE_KLIB__)
 
 static int my_abs(int input) {
-  return (input >= 0) ? input : -input;
+  return (input >= 0) ? (unsigned int)input : -(unsigned int)input;
 }
 
 static int fmt2str(char *str, const char *fmt, va_list ap) { 
@@ -35,11 +35,25 @@ static int fmt2str(char *str, const char *fmt, va_list ap) {
 
               int fmt_len = 0;
               char place_type = ' ';
+              bool is_left_align = false;
               // collect the length of placeholder format 
-              // support %02d
+              // support %02d %2d
               // BUGFIX: illegal input figure
-              if(placeholder_len > 1) {fmt_len = *(placeholder_r - 1) - '0';}
-              if(placeholder_len > 2) {place_type = *(placeholder_r - 2);}
+              if(placeholder_len == 2) {fmt_len = *(placeholder_r - 1) - '0';}
+              if(placeholder_len > 2) {
+                const char *p_len = placeholder_l; 
+                while(p_len != placeholder_r) {
+                  if(p_len == placeholder_l) {
+                    if(*placeholder_l == '0') 
+                      place_type = '0';
+                    else if(*placeholder_l == '-') 
+                      is_left_align = true;
+                  }
+                  if(*p_len <= '9' && *p_len >= '0')
+                    fmt_len = fmt_len * 10 + (int)(*p_len - '0');
+                  p_len ++;
+                }
+              }
               switch (placeholder_type)
               {
               case 'c':
@@ -58,26 +72,64 @@ static int fmt2str(char *str, const char *fmt, va_list ap) {
               case 'd':
                 d = va_arg(ap, int);
                 fmt += placeholder_len + 1;
-                if(d < 0) {
-                  *str++ = '-'; 
-                  str_len ++;
-                }
-                char buf_d[32] = {};
+                int is_neg = 0;
+                if(d < 0) is_neg = 1;
+
+                /* inverted seq */
+                char buf_d[32] = {0};
+                memset(buf_d, 0, 32);
                 int i = 0;
+
+                /* int2srt */
                 do {
                   buf_d[i] = my_abs(d % 10) + 48;
                   d = my_abs(d / 10);
                   i ++;
                 } while(d);
+
+                /* neg sign with ' '*/
+                if(is_neg && place_type == ' '){
+                  buf_d[i] = '-'; 
+                  is_neg = 0;
+                  i ++;
+                }
+
+                /* placeholder */
+                char align_place[32] = {0};
+                memset(align_place, 0, 32);
                 if(i < fmt_len) {
+                  /* left align */
+                  if(is_left_align) {
+                    for(int j = 0; j < fmt_len - i; j ++) {
+                      align_place[j] = place_type;
+                    }
+                  }
+                  else
                   for(; i < fmt_len; i ++){
                     buf_d[i] = place_type;
                   }
                 }
+
+                /* neg sign without ' '*/
+                if(is_neg && place_type != ' '){
+                  if(buf_d[i - 1] == place_type) i --;
+                  buf_d[i] = '-'; 
+                  is_neg = 0;
+                  i ++;
+                }
+
+                /* buf2str */
                 for (; i > 0; i--)
                 {
                   *str++ = buf_d[i - 1];
                   str_len ++;
+                }
+                if(is_left_align) {
+                  for(int j = 0; j < strlen(align_place); j ++) {
+                    *str ++ = align_place[j];
+                    str_len ++;
+                  }
+                  is_left_align = false;
                 }
                 break;
               case 'x':
@@ -87,22 +139,40 @@ static int fmt2str(char *str, const char *fmt, va_list ap) {
                 //   x = 0xffffffff -(x + 1);
                 // }
                 x = (unsigned int)x;
-                char buf_x[32] = {};  
+                char buf_x[32] = {0};  
+                memset(buf_x , 0, 32);
                 i = 0;
                 do {
                   buf_x[i] = (x % 16 < 10) ? ((x % 16) + 48) : ((x % 16) + 87);
                   x /= 16;
                   i ++;
                 } while(x);
+
+                memset(align_place, 0, 32);
                 if(i < fmt_len) {
+                  /* left align */
+                  if(is_left_align) {
+                    for(int j = 0; j < fmt_len - i; j ++) {
+                      align_place[j] = place_type;
+                    }
+                  }
+                  else
                   for(; i < fmt_len; i ++){
                     buf_x[i] = place_type;
                   }
                 }
+                
                 for (; i > 0; i--)
                 {
                   *str++ = buf_x[i - 1];
                   str_len ++;
+                }
+                if(is_left_align) {
+                  for(int j = 0; j < strlen(align_place); j ++) {
+                    *str ++ = align_place[j];
+                    str_len ++;
+                  }
+                  is_left_align = false;
                 }
                 break;
               default:
