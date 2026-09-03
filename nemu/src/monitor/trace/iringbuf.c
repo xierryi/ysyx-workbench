@@ -1,6 +1,6 @@
-#include <assert.h>
-#include <stdlib.h>
 #include <iringbuf.h>
+#ifdef CONFIG_IRINGBUF
+#include <stdlib.h>
 #include <cpu/cpu.h>
 
 void disassemble(char *str, int size, uint64_t pc, uint8_t *code, int nbyte);
@@ -108,3 +108,5 @@ int IringBuf_read(Decode *target, int amount) {
     }
     return read_count;
 }
+
+#endif

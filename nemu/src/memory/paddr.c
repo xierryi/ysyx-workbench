@@ -102,6 +102,7 @@ void paddr_write(paddr_t addr, int len, word_t data) {
     mtrace_log(addr, data, len, WRITE_MODE);
     return; 
   }
+  // printf("1111111111\n");
   IFDEF(CONFIG_DEVICE, mmio_write(addr, len, data); return);
   // #ifdef CONFIG_MTRACE
   // #endif

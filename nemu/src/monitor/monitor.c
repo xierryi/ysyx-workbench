@@ -129,9 +129,7 @@ void init_monitor(int argc, char *argv[]) {
   long img_size = load_img();
 
   /* Load the elf file to parse the function information*/
-  #ifdef CONFIG_FTRACE
-  load_elf(elf_file);
-  #endif
+  IFDEF(CONFIG_FTRACE, load_elf(elf_file));
 
   /* Initialize differential testing. */
   init_difftest(diff_so_file, img_size, difftest_port);
@@ -141,8 +139,7 @@ void init_monitor(int argc, char *argv[]) {
 
   IFDEF(CONFIG_ITRACE, init_disasm());
 
-  // IFDEF(CONFIG_IRINGBUF, init_IringBuf());
-  init_IringBuf();
+  IFDEF(CONFIG_IRINGBUF, init_IringBuf());
 
   /* Display welcome message. */
   welcome();
@@ -151,7 +148,8 @@ void init_monitor(int argc, char *argv[]) {
 static long load_img() {
   extern char bin_start, bin_end;
   size_t size = &bin_end - &bin_start;
-  Log("img size = %ld", size);
+  // Log("img size = %ld", size);
+  Log("img size = %d", size);
   memcpy(guest_to_host(RESET_VECTOR), &bin_start, size);
   return size;
 }

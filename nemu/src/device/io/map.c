@@ -18,7 +18,6 @@
 #include <memory/vaddr.h>
 #include <device/map.h>
 
-// #define DTRACE_ENABLED
 #define IO_SPACE_MAX (32 * 1024 * 1024)
 
 static uint8_t *io_space = NULL;
@@ -53,14 +52,14 @@ void init_map() {
   p_space = io_space;
 }
 
-void dtrace_read(paddr_t addr, int len, IOMap *map) {
-  #ifdef DTRACE_ENABLED
-    if (map && map->name) {
-      Log("Reading '%s' at [0x%08x, 0x%08x]", 
-        map->name, addr, addr + len );
-    }
-  #endif
-}
+// void dtrace_read(paddr_t addr, int len, IOMap *map) {
+//   #ifdef CONFIG_DTRACE
+//     if (map && map->name) {
+//       Log("[dtrace] Reading '%s' at [0x%08x, 0x%08x]", 
+//         map->name, addr, addr + len );
+//     }
+//   #endif
+// }
 
 word_t map_read(paddr_t addr, int len, IOMap *map) {
   assert(len >= 1 && len <= 8);
@@ -68,9 +67,15 @@ word_t map_read(paddr_t addr, int len, IOMap *map) {
   paddr_t offset = addr - map->low;
   invoke_callback(map->callback, offset, len, false); // prepare data to read
   word_t ret = host_read(map->space + offset, len);
-  #ifdef DTRACE_ENABLED
-    if (map && map->name) Log("Reading '%s' at [0x%08x, 0x%08x]", 
-      map->name, addr, addr + len );
+  #ifdef CONFIG_DTRACE
+    if (map && map->name) {
+      if(len > 1)
+        printf("0x%08x: %d 0x%x\t[dtrace: read %d bytes from '%s']\n", 
+          addr, ret, ret, len, map->name);
+      else 
+        printf("0x%08x: %d 0x%x\t[dtrace: read %d byte from '%s']\n", 
+          addr, ret, ret, len, map->name);
+    }
   #endif
   return ret;
 }
@@ -81,8 +86,14 @@ void map_write(paddr_t addr, int len, word_t data, IOMap *map) {
   paddr_t offset = addr - map->low;
   host_write(map->space + offset, len, data);
   invoke_callback(map->callback, offset, len, true);
-  #ifdef DTRACE_ENABLED
-    if (map && map->name && strcmp(map->name, "serial")) Log("Writing '%s' at [0x%08x, 0x%08x]", 
-      map->name, addr, addr + len );
+  #ifdef CONFIG_DTRACE
+    if (map && map->name && strcmp(map->name, "serial")) {
+      if(len > 1) 
+        printf("0x%08x: %d 0x%x\t[dtrace: write %d bytes to '%s']\n", 
+          addr, data, data, len, map->name);
+      else 
+        printf("0x%08x: %d 0x%x\t[dtrace: write %d byte to '%s']\n", 
+          addr, data, data, len, map->name);
+    } 
   #endif
 }
