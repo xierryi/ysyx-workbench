@@ -353,6 +353,8 @@ void Vtop___024root___nba_sequent__TOP__0(Vtop___024root* vlSelf) {
         Vtop___024root____Vdpiimwrap_top__DOT__u3__DOT__npc_trap_TOP(vlSelfRef.top__DOT__pc, vlSelfRef.top__DOT__u0__DOT__rf
                                                                      [vlSelfRef.top__DOT__u2__DOT__raddr1]);
     }
+    VL_WRITEF_NX("PC: %x\ninst: %x\n",2, '#',32,vlSelfRef.top__DOT__pc
+                 , '#',32,vlSelfRef.top__DOT__inst);
     if (((1U == (IData)(vlSelfRef.top__DOT__u2__DOT__op_type)) 
          | ((4U == (IData)(vlSelfRef.top__DOT__u2__DOT__op_type)) 
             | (0U == (IData)(vlSelfRef.top__DOT__u2__DOT__op_type))))) {

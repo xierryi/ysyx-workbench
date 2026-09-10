@@ -15,11 +15,13 @@ VERILATOR_FLAGS += --build
 VERILATOR_FLAGS += -j 0   
 # Specify the top file
 VERILATOR_FLAGS += --top-module $(TOPNAME)
+# Support readline
+VERILATOR_FLAGS += --LDFLAGS "-lreadline"
 
 # Input files for Verilator
 VSRC_DIR := $(abspath ./vsrc)
 VSRC := $(shell find $(VSRC_DIR) -name "*.v")
-CSRC := $(shell find $(abspath ./csrc) -name "main.cpp")
+CSRC := $(shell find $(abspath ./csrc) -name "*.cpp")
 
 VERILATOR_INPUT := $(VSRC) $(CSRC)
 

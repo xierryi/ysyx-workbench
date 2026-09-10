@@ -117,8 +117,8 @@ ysyx_26060173_LSU u5(
 
 /* test module */
 always @(posedge clk) begin
-    // $display("PC: %x", pc);
-    // $display("inst: %x", inst);
+    $display("PC: %x", pc);
+    $display("inst: %x", inst);
     // $display("rdata1: %x", rdata1);
     // $display("rdata2: %x", rdata2);
     // $display("raddr1: %x", raddr1);
