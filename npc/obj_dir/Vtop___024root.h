@@ -17,9 +17,9 @@ class alignas(VL_CACHE_LINE_BYTES) Vtop___024root final {
     VL_IN8(clk,0,0);
     VL_IN8(rst_pc,0,0);
     VL_IN8(wen_pc,0,0);
-    CData/*4:0*/ top__DOT__u2__DOT__raddr1;
     CData/*3:0*/ top__DOT__u2__DOT__op_encoded;
     CData/*2:0*/ top__DOT__u2__DOT__op_type;
+    CData/*4:0*/ top__DOT__u2__DOT__rs1;
     CData/*0:0*/ top__DOT__u3__DOT__M_ren;
     CData/*0:0*/ top__DOT__u3__DOT__M_wen;
     CData/*3:0*/ __Vtableidx1;
@@ -35,6 +35,7 @@ class alignas(VL_CACHE_LINE_BYTES) Vtop___024root final {
     IData/*31:0*/ top__DOT__inst;
     IData/*31:0*/ top__DOT__pc;
     IData/*31:0*/ top__DOT__M_rdata;
+    IData/*31:0*/ top__DOT__u0__DOT__unnamedblk1__DOT__i;
     IData/*31:0*/ top__DOT__u1__DOT____VlemCond_1;
     IData/*31:0*/ top__DOT__u1__DOT____VlemCall_0__pmem_read;
     IData/*31:0*/ top__DOT__u2__DOT__operand3;
@@ -42,10 +43,10 @@ class alignas(VL_CACHE_LINE_BYTES) Vtop___024root final {
     IData/*31:0*/ top__DOT__u3__DOT__M_waddr;
     IData/*31:0*/ top__DOT__u3__DOT__result;
     IData/*31:0*/ top__DOT__u3__DOT__dnpc;
-    IData/*31:0*/ __Vfunc_top__DOT__u5__DOT__pmem_read__2__Vfuncout;
+    IData/*31:0*/ __Vfunc_top__DOT__u5__DOT__pmem_read__4__Vfuncout;
     IData/*31:0*/ __VdfgRegularize_h6e95ff9d_0_0;
     IData/*31:0*/ __VactIterCount;
-    VlUnpacked<IData/*31:0*/, 32> top__DOT__u0__DOT__rf;
+    VlUnpacked<IData/*31:0*/, 16> top__DOT__u0__DOT__rf;
     VlUnpacked<QData/*63:0*/, 1> __VstlTriggered;
     VlUnpacked<QData/*63:0*/, 1> __VicoTriggered;
     VlUnpacked<QData/*63:0*/, 1> __VactTriggered;

@@ -16,7 +16,7 @@ VERILATOR_FLAGS += -j 0
 # Specify the top file
 VERILATOR_FLAGS += --top-module $(TOPNAME)
 # Support readline
-VERILATOR_FLAGS += --LDFLAGS "-lreadline"
+VERILATOR_FLAGS += --LDFLAGS "-lreadline -fsanitize=address"
 
 # Input files for Verilator
 VSRC_DIR := $(abspath ./vsrc)

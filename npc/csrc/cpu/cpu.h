@@ -16,8 +16,16 @@ typedef struct
     int halt_pc;
 } NPCState;
 
+typedef struct
+{
+    int pc;
+} CPU;
+
+extern CPU cpu;
+
 void cpu_exec(int n);
 extern "C" void npc_trap(int pc, int halt_ret);  
+extern "C" void cpu_get_pc(int pc); 
 void system_init(int argc, char **argv);
 void cpu_init();
 void system_free();

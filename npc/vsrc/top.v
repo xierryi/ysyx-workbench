@@ -9,11 +9,11 @@ wire [31:0] inst;
 wire [31:0] pc;
 
 // regfiles interfaces
-wire [4:0] waddr; 
+wire [3:0] waddr; 
 wire [31:0] wdata;
 wire wen;
-wire [4:0] raddr1; 
-wire [4:0] raddr2; 
+wire [3:0] raddr1; 
+wire [3:0] raddr2; 
 wire [31:0] rdata1;
 wire [31:0] rdata2;
 
@@ -41,7 +41,7 @@ wire [31:0] dnpc;
 wire [31:0] d_pcreg;
 
 ysyx_26060173_RegisterFile #(
-    5,
+    4,
     32
 ) u0(
     .clk(clk),

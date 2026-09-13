@@ -22,4 +22,9 @@ always @(*) begin
     inst = wen ? pmem_read(pc) : 0; 
 end    
 
+import "DPI-C" function void cpu_get_pc(input int pc);
+always @(*) begin
+    cpu_get_pc(pc);
+end    
+
 endmodule

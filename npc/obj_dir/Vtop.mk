@@ -40,14 +40,16 @@ VM_USER_CFLAGS = \
 
 # User LDLIBS (from -LDFLAGS on Verilator command line)
 VM_USER_LDLIBS = \
-  -lreadline \
+  -lreadline -fsanitize=address \
 
 # User .cpp files (from .cpp's on Verilator command line)
 VM_USER_CLASSES = \
   cpu \
   main \
   mem \
+  expr \
   sdb \
+  reg \
 
 # User .cpp directories (from .cpp's on Verilator command line)
 VM_USER_DIR = \
@@ -56,6 +58,7 @@ VM_USER_DIR = \
   ../csrc/cpu \
   ../csrc/memory \
   ../csrc/monitor/sdb \
+  ../csrc/reg \
 
 ### Default rules...
 # Include list of all generated classes
@@ -72,7 +75,11 @@ main.o: /home/xierry/ysyx-workbench/npc/csrc/main.cpp
 	$(OBJCACHE) $(CXX) $(CXXFLAGS) $(CPPFLAGS) $(OPT_FAST)  -c -o $@ $<
 mem.o: /home/xierry/ysyx-workbench/npc/csrc/memory/mem.cpp 
 	$(OBJCACHE) $(CXX) $(CXXFLAGS) $(CPPFLAGS) $(OPT_FAST)  -c -o $@ $<
+expr.o: /home/xierry/ysyx-workbench/npc/csrc/monitor/sdb/expr.cpp 
+	$(OBJCACHE) $(CXX) $(CXXFLAGS) $(CPPFLAGS) $(OPT_FAST)  -c -o $@ $<
 sdb.o: /home/xierry/ysyx-workbench/npc/csrc/monitor/sdb/sdb.cpp 
+	$(OBJCACHE) $(CXX) $(CXXFLAGS) $(CPPFLAGS) $(OPT_FAST)  -c -o $@ $<
+reg.o: /home/xierry/ysyx-workbench/npc/csrc/reg/reg.cpp 
 	$(OBJCACHE) $(CXX) $(CXXFLAGS) $(CPPFLAGS) $(OPT_FAST)  -c -o $@ $<
 
 ### Link rules... (from --exe)

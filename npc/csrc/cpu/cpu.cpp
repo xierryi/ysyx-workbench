@@ -17,6 +17,7 @@ VerilatedContext* contextp = new VerilatedContext;
 Vtop* top = new Vtop{contextp};
 
 NPCState npc_state = {.state = NPC_STOP};
+CPU cpu;
 
 void system_init(int argc, char **argv) {
     contextp->commandArgs(argc, argv);
@@ -27,6 +28,10 @@ extern "C" void npc_trap(int pc, int halt_ret) {
   npc_state.state = NPC_END;
   npc_state.halt_pc = pc;
   Verilated::gotFinish(true);
+}
+
+extern "C" void cpu_get_pc(int pc) {
+  cpu.pc = pc;
 }
 
 void cpu_init(){
@@ -55,7 +60,7 @@ void cpu_exec(int n) {
   g_print_step = (n < MAX_INST_TO_PRINT);
   switch (npc_state.state) {
     case NPC_END:
-      printf("Program execution has ended. To restart the program, exit NEMU and run again.\n");
+      printf("Program execution has ended. To restart the program, exit NPC and run again.\n");
       return;
     default: npc_state.state = NPC_RUNNING;
   }

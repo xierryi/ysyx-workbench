@@ -6,8 +6,8 @@ module ysyx_26060173_IDU(
     // read from reg 
     input [31:0] rdata1,
     input [31:0] rdata2,
-    output [4:0] raddr1,
-    output [4:0] raddr2,
+    output [3:0] raddr1,
+    output [3:0] raddr2,
 
     // output operand and ctrl signal to EXU
     output [31:0] operand1,
@@ -63,8 +63,10 @@ assign op_type = R_type & {3{(op_encoded == add_encoded )}}
 
 
 /* field fetch module */
+/* verilator lint_off UNUSEDSIGNAL */
 wire [4:0] rs1;
 wire [4:0] rs2;
+/* verilator lint_on UNUSEDSIGNAL */
 wire [31:0] imm;
 
 assign rd = inst[11:7];
@@ -79,12 +81,11 @@ assign imm = {{20{inst[31]}}, inst[31:20]}             & {32{op_type == I_type}}
 ;
 
 /* interfaces for GPR and EXU */
-assign raddr1 = rs1;
+assign raddr1 = rs1[3:0];
 assign operand1 = rdata1;
-assign raddr2 = rs2;
+assign raddr2 = rs2[3:0];
 assign operand2 = rdata2;
 assign operand3 = imm;
-
 /* interfaces for LSU */
 assign wen = (op_type == R_type) || (op_type == I_type) || (op_type == U_type);
 endmodule

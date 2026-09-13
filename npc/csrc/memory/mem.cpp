@@ -29,6 +29,7 @@ void load_img(int argc, char** argv) {
   fclose(fp);
 }
 
+// static uint8_t * 
 // load inst api
 extern "C" int pmem_read(int raddr) {
   // Address alignment
@@ -78,4 +79,11 @@ extern "C" void pmem_write(int waddr, int wdata, char wmask) {
   // printf("waddr:%x\twaddr - CONFIG_MBASE:%x\n", waddr, waddr - CONFIG_MBASE);
   pmem[(waddr - CONFIG_MBASE) >> 2] = (pmem[(waddr - CONFIG_MBASE) >> 2] & ~wmask_4byte) | ((wdata << one_pos * 8) & wmask_4byte);
   
+}
+
+
+
+uint32_t paddr_read(uint32_t addr, int len) {
+  if(addr >= CONFIG_MBASE) { // in range figure
+  }
 }

@@ -3,6 +3,7 @@
 #include "monitor/sdb/sdb.h"
 #include "memory/mem.h"
 #include "cpu/cpu.h"
+#include "monitor/sdb/expr.h"
 
 int main(int argc, char** argv) {
 
@@ -11,6 +12,8 @@ int main(int argc, char** argv) {
   printf("file_img:%s\n",argv[1]);
 
   load_img(argc, argv);
+
+  init_regex();
 
   cpu_init();
 

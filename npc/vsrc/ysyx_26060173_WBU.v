@@ -3,18 +3,19 @@ module ysyx_26060173_WBU(
     input [31:0] dnpc,
 
     // gpr write interfaces
+/* verilator lint_off UNUSEDSIGNAL */
     input [4:0] rd,
+/* verilator lint_on UNUSEDSIGNAL */
     input [31:0] result,
 
     // write into reg
-    output [4:0] waddr,
+    output [3:0] waddr,
     output [31:0] wdata,
 
     // update pc
     output [31:0] d_pcreg
 );
-
-assign waddr = rd;
+assign waddr = rd[3:0];
 assign wdata = result;
 assign d_pcreg = dnpc;
 

@@ -233,15 +233,15 @@ static int cmd_x(char* args) {
             printf("A syntax error in expression!\n");
             return 0;
           }
+          word_t exp_index;
+          for(i = 0; i < num_words; i ++) {
+            exp_index = exp + 4 * i;
+            inst = paddr_read(exp_index, 4);
+            printf("0x%08x: 0x%02x 0x%02x 0x%02x 0x%02x\n", \
+            exp_index, (inst>>24) & 0xFF, (inst>>16) & 0xFF, (inst>>8) & 0xFF, inst & 0xFF);
+          }
+          return 0;
         }
-        word_t exp_index;
-        for(i = 0; i < num_words; i ++) {
-          exp_index = exp + 4 * i;
-          inst = paddr_read(exp_index, 4);
-          printf("0x%08x: 0x%02x 0x%02x 0x%02x 0x%02x\n", \
-          exp_index, (inst>>24) & 0xFF, (inst>>16) & 0xFF, (inst>>8) & 0xFF, inst & 0xFF);
-        }
-        return 0;
       }
     }
   }
