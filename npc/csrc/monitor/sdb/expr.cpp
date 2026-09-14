@@ -383,7 +383,7 @@ static unsigned int eval(Token *p, Token *q, bool *success) {
         case TK_NEQ: return (val1 != val2); break;
         case TK_LGAND: return (val1 && val2); break;
         case TK_LGOR: return (val1 || val2); break;
-        case TK_DEREF: return (pmem_read(val2)); break;
+        case TK_DEREF: return (paddr_read(val2, 1)); break;
         case TK_NEGA: return (-val2); break;
         
         default: *success = false; return 0 ;break;

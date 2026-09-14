@@ -23,7 +23,11 @@ VSRC_DIR := $(abspath ./vsrc)
 VSRC := $(shell find $(VSRC_DIR) -name "*.v")
 CSRC := $(shell find $(abspath ./csrc) -name "*.cpp")
 
+-include $(NPC_HOME)/csrc/monitor/utils/filelist.mk
+
 VERILATOR_INPUT := $(VSRC) $(CSRC)
+
+VERILATOR_FLAGS += -I$(NPC_HOME)/csrc/tools/capstone/repo/include
 
 default: sim
 
@@ -40,7 +44,7 @@ sim:
 
 	@echo	
 	@echo "--RUN----------------------"
-	obj_dir/Vtop $(IMG)
+	obj_dir/Vtop $(IMG).bin $(IMG).elf 
 
 clean:
 	rm -rf obj_dir/

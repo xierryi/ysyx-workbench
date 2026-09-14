@@ -49,6 +49,10 @@ VM_USER_CLASSES = \
   mem \
   expr \
   sdb \
+  ftrace \
+  itrace \
+  mtrace \
+  disasm \
   reg \
 
 # User .cpp directories (from .cpp's on Verilator command line)
@@ -58,6 +62,8 @@ VM_USER_DIR = \
   ../csrc/cpu \
   ../csrc/memory \
   ../csrc/monitor/sdb \
+  ../csrc/monitor/trace \
+  ../csrc/monitor/utils \
   ../csrc/reg \
 
 ### Default rules...
@@ -78,6 +84,14 @@ mem.o: /home/xierry/ysyx-workbench/npc/csrc/memory/mem.cpp
 expr.o: /home/xierry/ysyx-workbench/npc/csrc/monitor/sdb/expr.cpp 
 	$(OBJCACHE) $(CXX) $(CXXFLAGS) $(CPPFLAGS) $(OPT_FAST)  -c -o $@ $<
 sdb.o: /home/xierry/ysyx-workbench/npc/csrc/monitor/sdb/sdb.cpp 
+	$(OBJCACHE) $(CXX) $(CXXFLAGS) $(CPPFLAGS) $(OPT_FAST)  -c -o $@ $<
+ftrace.o: /home/xierry/ysyx-workbench/npc/csrc/monitor/trace/ftrace.cpp 
+	$(OBJCACHE) $(CXX) $(CXXFLAGS) $(CPPFLAGS) $(OPT_FAST)  -c -o $@ $<
+itrace.o: /home/xierry/ysyx-workbench/npc/csrc/monitor/trace/itrace.cpp 
+	$(OBJCACHE) $(CXX) $(CXXFLAGS) $(CPPFLAGS) $(OPT_FAST)  -c -o $@ $<
+mtrace.o: /home/xierry/ysyx-workbench/npc/csrc/monitor/trace/mtrace.cpp 
+	$(OBJCACHE) $(CXX) $(CXXFLAGS) $(CPPFLAGS) $(OPT_FAST)  -c -o $@ $<
+disasm.o: /home/xierry/ysyx-workbench/npc/csrc/monitor/utils/disasm.cpp 
 	$(OBJCACHE) $(CXX) $(CXXFLAGS) $(CPPFLAGS) $(OPT_FAST)  -c -o $@ $<
 reg.o: /home/xierry/ysyx-workbench/npc/csrc/reg/reg.cpp 
 	$(OBJCACHE) $(CXX) $(CXXFLAGS) $(CPPFLAGS) $(OPT_FAST)  -c -o $@ $<

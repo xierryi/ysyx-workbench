@@ -21,10 +21,12 @@ wire [31:0] rdata2;
 wire M_ren;
 wire M_wen;
 wire [31:0] M_waddr;
+wire [1:0] M_wlen;
 wire [31:0] M_wdata;
 wire [7:0] M_wmask;
 wire [31:0] M_rdata;
 wire [31:0] M_raddr; 
+wire [1:0] M_rlen;
 
 // input operand of EXU
 wire [3:0] op_encoded;
@@ -75,7 +77,9 @@ ysyx_26060173_IDU u2(
     .operand2(operand2),
     .operand3(operand3),
     .op_encoded(op_encoded),
-    .rd(rd)
+    .rd(rd),
+    .pc(pc),
+    .dnpc(dnpc)
 );
 
 ysyx_26060173_EXU u3(
@@ -90,7 +94,9 @@ ysyx_26060173_EXU u3(
     .M_ren(M_ren),
     .M_wen(M_wen),
     .M_raddr(M_raddr),
+    .M_rlen(M_rlen),
     .M_waddr(M_waddr),
+    .M_wlen(M_wlen),
     .M_wdata(M_wdata),
     .M_wmask(M_wmask),
     .dnpc(dnpc)
@@ -109,16 +115,18 @@ ysyx_26060173_LSU u5(
     .ren(M_ren),
     .wen(M_wen),
     .waddr(M_waddr),
+    .wlen(M_wlen),
     .wdata(M_wdata),
     .wmask(M_wmask),
     .raddr(M_raddr),
+    .rlen(M_rlen),
     .rdata(M_rdata)
 );
 
 /* test module */
 always @(posedge clk) begin
-    $display("PC: %x", pc);
-    $display("inst: %x", inst);
+    // $display("PC: %x", pc);
+    // $display("inst: %x", inst);
     // $display("rdata1: %x", rdata1);
     // $display("rdata2: %x", rdata2);
     // $display("raddr1: %x", raddr1);
@@ -130,9 +138,11 @@ always @(posedge clk) begin
     // $display("wdata: %x", wdata);
     // $display("M_rdata: %x", M_rdata);
     // $display("M_raddr: %x", M_raddr);
+    // $display("rlen: %x", M_rlen);
 
     // $display("dnpc: %x", dnpc);
     // $display("M_waddr: %x", M_waddr);
+    // $display("M_wen: %x", M_wen);
     // $display("M_wdata: %x", M_wdata);
     // $display("op_encoded: %d", op_encoded);
 

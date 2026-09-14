@@ -167,7 +167,7 @@ static int cmd_x(char* args) {
         uint32_t exp_index;
         for(int i = 0; i < num_words; i ++) {
           exp_index = exp + 4 * i;
-          inst = pmem_read(exp_index);
+          inst = paddr_read(exp_index, 4);
           printf("0x%08x: 0x%02x 0x%02x 0x%02x 0x%02x\n", \
           exp_index, (inst>>24) & 0xFF, (inst>>16) & 0xFF, (inst>>8) & 0xFF, inst & 0xFF);
         }

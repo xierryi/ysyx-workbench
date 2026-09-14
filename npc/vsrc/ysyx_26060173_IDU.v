@@ -16,7 +16,11 @@ module ysyx_26060173_IDU(
     output [3:0] op_encoded,
 
     // decode signal from inst
-    output [4:0] rd
+    output [4:0] rd,
+
+    // for ftrace
+    input [31:0] pc,
+    input [31:0] dnpc
 );
 
 /* opcode encoded module */
@@ -88,4 +92,13 @@ assign operand2 = rdata2;
 assign operand3 = imm;
 /* interfaces for LSU */
 assign wen = (op_type == R_type) || (op_type == I_type) || (op_type == U_type);
+
+import "DPI-C" function void ftrace_get_addr(input int inst_addr, input int func_addr, 
+    input byte rs1, input byte rd, input int imm);
+always @(*) begin
+    if(op_encoded == jalr_encoded) begin
+       ftrace_get_addr(pc, dnpc, {3'b0, rs1}, {3'b0, rd}, imm);
+    end
+end
+
 endmodule

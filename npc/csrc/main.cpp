@@ -4,6 +4,8 @@
 #include "memory/mem.h"
 #include "cpu/cpu.h"
 #include "monitor/sdb/expr.h"
+#include "monitor/utils/disasm.h"
+#include "monitor/trace/ftrace.h"
 
 int main(int argc, char** argv) {
 
@@ -13,7 +15,11 @@ int main(int argc, char** argv) {
 
   load_img(argc, argv);
 
+  load_elf(argv[2]);
+
   init_regex();
+
+  init_disasm(); 
 
   cpu_init();
 

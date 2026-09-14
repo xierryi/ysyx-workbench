@@ -57,7 +57,7 @@ bool g_print_step = false;
 
 void cpu_exec(int n) {
   unsigned int n_U = (unsigned int) n;
-  g_print_step = (n < MAX_INST_TO_PRINT);
+  g_print_step = (n_U < MAX_INST_TO_PRINT);
   switch (npc_state.state) {
     case NPC_END:
       printf("Program execution has ended. To restart the program, exit NPC and run again.\n");

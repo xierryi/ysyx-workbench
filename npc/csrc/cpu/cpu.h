@@ -31,6 +31,8 @@ void cpu_init();
 void system_free();
 int system_isGoodret(); 
 
+extern bool g_print_step;
+
 #ifdef __cplusplus
 extern "C" {
 #endif

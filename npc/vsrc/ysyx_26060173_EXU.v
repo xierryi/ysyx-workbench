@@ -15,7 +15,9 @@ module ysyx_26060173_EXU(
     output M_ren,
     output M_wen,
     output [31:0] M_raddr,
+    output [1:0] M_rlen,
     output [31:0] M_waddr,
+    output [1:0] M_wlen,
     output [31:0] M_wdata,
     output [7:0] M_wmask,
 
@@ -38,7 +40,7 @@ parameter jalr_encoded = 4'b0111;
 parameter ebreak_encoded = 4'b1000;
 
 wire add_en, addi_en, lui_en, lw_en, lbu_en, sw_en, sb_en, jalr_en, ebreak_en;
-wire [4:0] M_raddr_shiftbit;
+// wire [4:0] M_raddr_shiftbit;
 
 assign add_en  = (op_encoded == add_encoded);
 assign addi_en = (op_encoded == addi_encoded);
@@ -55,7 +57,14 @@ assign ebreak_en = (op_encoded == ebreak_encoded);
 // M_rxx handle module 
 assign M_ren = lw_en | lbu_en ;
 assign M_raddr = (operand1 + operand3) & {32{lw_en | lbu_en}};
-assign M_raddr_shiftbit = M_raddr[1:0] << 3;
+
+parameter LEN_1 = 2'b00;
+// parameter LEN_2 = 2'b01;
+parameter LEN_4 = 2'b11;
+
+assign M_rlen = LEN_1 & {2{lbu_en}} | 
+                LEN_4 & {2{lw_en}};
+// assign M_raddr_shiftbit = M_raddr[1:0] << 3;
 
 // M_wxxxx handle module
 assign M_wen = sw_en | sb_en;
@@ -66,7 +75,8 @@ assign M_wmask = 8'b1111 & {8{sw_en}}
                 | 8'b0010 & {8{(M_waddr[1:0] == 2'b01)}} 
                 | 8'b0100 & {8{(M_waddr[1:0] == 2'b10)}} 
                 | 8'b1000 & {8{(M_waddr[1:0] == 2'b11)}}) & {8{sb_en}};
-
+assign M_wlen = LEN_1 & {2{sb_en}} | 
+                LEN_4 & {2{sw_en}};
 
 /* result and dnpc handle module */
 assign result = (operand1 + operand2)                  & {32{add_en}}
@@ -74,7 +84,8 @@ assign result = (operand1 + operand2)                  & {32{add_en}}
               | (pc + 4)                               & {32{jalr_en}} 
               | operand3                               & {32{lui_en}}
               | M_rdata                                & {32{lw_en}}
-              | (M_rdata >> M_raddr_shiftbit) & 32'hFF & {32{lbu_en}};
+              | M_rdata                                & {32{lbu_en}};
+            //   | (M_rdata >> M_raddr_shiftbit) & 32'hFF & {32{lbu_en}};
 
 assign dnpc = (pc + 4) & {32{~jalr_en}}
             | ((operand1 + operand3) & 32'hFFFFFFFE) & {32{jalr_en}};
