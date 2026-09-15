@@ -78,8 +78,8 @@ void load_elf(char * elf_file) {
     }
     
     /* parse symbol table */
-    assert(symtbl_size < 4096);
-    uint8_t sym_tbl[4096];
+    assert(symtbl_size < 20000);
+    uint8_t sym_tbl[20000];
     assert(symtbl_offset != 0);
     fseek(fp, symtbl_offset, SEEK_SET);
     ret = fread(sym_tbl, symtbl_size, 1, fp);
@@ -104,8 +104,8 @@ void load_elf(char * elf_file) {
     }
 
     /* get func name */
-    assert(strtbl_size < 4096);
-    uint8_t str_seq[4096];
+    assert(strtbl_size < 20000);
+    uint8_t str_seq[20000];
     assert(strtbl_offset != 0);
     fseek(fp, strtbl_offset, SEEK_SET);
     ret = fread(str_seq, strtbl_size, 1, fp);
@@ -149,8 +149,13 @@ static bool get_func_idx(uint32_t addr, int *idx) {
 }
 
 extern "C" void ftrace_get_addr(uint32_t inst_addr, uint32_t func_addr, char rs1, char rd, uint32_t imm) { 
+  static int call_count_2 = 0; // call_count_2 is strange!! TO FIX ME
   int idx = 0;
   static int func_depth = 0;
+  
+  if(call_count_2 > 1) call_count_2 = 0; 
+  else call_count_2 ++;
+  if(call_count_2 == 0)
   if(is_ret(rs1, rd, imm)) {
       printf("0x%8x: ", inst_addr);
       if(get_func_idx(inst_addr, &idx)) {

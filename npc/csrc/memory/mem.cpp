@@ -123,8 +123,11 @@ uint32_t paddr_read(int raddr, int len) {
 // load inst api
 extern "C" int vaddr_read(int raddr, int len) {
   uint32_t data = paddr_read(raddr, len);
+  static int call_count_2 = 0; 
   if(g_print_step) {
-    mtrace_output(raddr, data, len, READ_MODE);
+    if(call_count_2 > 1) call_count_2 = 0; 
+    else call_count_2 ++;
+    if(call_count_2 == 0) mtrace_output(raddr, data, len, READ_MODE);
   }
   return data; // avoid any shift in RTL
   // return pmem[raddr - CONFIG_MBASE];
@@ -132,7 +135,12 @@ extern "C" int vaddr_read(int raddr, int len) {
 
 extern "C" int vaddr_ifetch(int raddr, int len) {
   int inst = paddr_read(raddr, len);
-  if(g_print_step) itrace_output(inst, raddr);
+  static int call_count_2 = 0; // call_count_2 is strange!! TO FIX ME
+  if(g_print_step) {
+    if(call_count_2 > 1) call_count_2 = 0; 
+    else call_count_2 ++;
+    if(call_count_2 == 1)itrace_output(inst, raddr);
+  }
   return inst; // avoid any shift in RTL
 }
 // store inst api
@@ -170,21 +178,8 @@ extern "C" void vaddr_write(int waddr, int wdata, int len, char wmask) {
   // pmem[(waddr - CONFIG_MBASE)] = (pmem[(waddr - CONFIG_MBASE)] & ~wmask_4byte) | ((wdata << one_pos * 8) & wmask_4byte);
   host_write(gest_to_host(waddr), len, wdata);
   if(g_print_step) {
-    mtrace_output(waddr, wdata, len, WRITE_MODE);
+    if(call_count_2 > 1) call_count_2 = 0; 
+    else call_count_2 ++;
+    if(call_count_2 == 0) mtrace_output(waddr, wdata, len, WRITE_MODE);
   }
-  // printf("C:wmask:%x\n",wmask);
-  // printf("C:pmem(%x):%x\n",waddr, pmem[(waddr - CONFIG_MBASE)]);
-  // printf("C:pmem(%x):%x\n",waddr + 1, pmem[(waddr - CONFIG_MBASE + 1)]);
-  // printf("C:pmem(%x):%x\n",waddr + 2, pmem[(waddr - CONFIG_MBASE + 2)]);
-  // printf("C:pmem(%x):%x\n",4, pmem[4]);
-  // printf("C:pmem(%x):%x\n",4 + 1, pmem[5]);
-  // printf("C:pmem(%x):%x\n",4 + 2, pmem[6]);
-  // printf("C:pmem(%x):%x\n",4 + 3, pmem[7]);
 }
-
-
-
-// uint32_t paddr_read(uint32_t addr, int len) {
-//   if(addr >= CONFIG_MBASE) { // in range figure
-//   }
-// }

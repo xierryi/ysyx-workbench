@@ -18,8 +18,8 @@ ysyx_26060173_PCRegister #(32) u0(
 );
 
 import "DPI-C" function int vaddr_ifetch(input int raddr, input int len);
-always @(posedge clk) begin
-    inst <= wen ? vaddr_ifetch(pc, 4) : 0; 
+always @(*) begin
+    inst = wen ? vaddr_ifetch(pc, 4) : 0; 
 end    
 
 import "DPI-C" function void cpu_get_pc(input int pc);

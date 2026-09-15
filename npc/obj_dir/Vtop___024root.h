@@ -25,6 +25,8 @@ class alignas(VL_CACHE_LINE_BYTES) Vtop___024root final {
     CData/*3:0*/ __Vtableidx1;
     CData/*0:0*/ __VstlFirstIteration;
     CData/*0:0*/ __VstlPhaseResult;
+    CData/*0:0*/ __VicoFirstIteration;
+    CData/*0:0*/ __VicoPhaseResult;
     CData/*0:0*/ __Vtrigprevexpr___TOP__clk__0;
     CData/*0:0*/ __Vtrigprevexpr___TOP__rst_pc__0;
     CData/*0:0*/ __VactPhaseResult;
@@ -45,9 +47,10 @@ class alignas(VL_CACHE_LINE_BYTES) Vtop___024root final {
     IData/*31:0*/ __VactIterCount;
     VlUnpacked<IData/*31:0*/, 16> top__DOT__u0__DOT__rf;
     VlUnpacked<QData/*63:0*/, 1> __VstlTriggered;
+    VlUnpacked<QData/*63:0*/, 1> __VicoTriggered;
     VlUnpacked<QData/*63:0*/, 1> __VactTriggered;
     VlUnpacked<QData/*63:0*/, 1> __VnbaTriggered;
-    VlUnpacked<CData/*0:0*/, 2> __Vm_traceActivity;
+    VlUnpacked<CData/*0:0*/, 4> __Vm_traceActivity;
 
     // INTERNAL VARIABLES
     Vtop__Syms* vlSymsp;
