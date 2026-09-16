@@ -18,6 +18,8 @@ extern "C" {
     // DPI IMPORTS
     // DPI import at /home/xierry/ysyx-workbench/npc/vsrc/ysyx_26060173_IFU.v:25:30
     extern void cpu_get_pc(int pc);
+    // DPI import at /home/xierry/ysyx-workbench/npc/vsrc/ysyx_26060173_PCRegister.v:10:34
+    extern void difftest_step(int pc, int npc);
     // DPI import at /home/xierry/ysyx-workbench/npc/vsrc/ysyx_26060173_IDU.v:96:30
     extern void ftrace_get_addr(int inst_addr, int func_addr, char rs1, char rd, int imm);
     // DPI import at /home/xierry/ysyx-workbench/npc/vsrc/ysyx_26060173_EXU.v:96:30

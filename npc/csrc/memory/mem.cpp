@@ -55,7 +55,7 @@ int load_img(int argc, char** argv) {
   img_file = argv[1];
   if(img_file == NULL) {
     printf("Error loading img 1.\n");
-    return 1;
+    return 4096;
   }
   FILE *fp = fopen(img_file, "rb");
   if(fp == NULL) {
@@ -65,17 +65,17 @@ int load_img(int argc, char** argv) {
   fseek(fp, 0, SEEK_END);
   long size = ftell(fp);
   
-  if(fp) printf("The image is %s, size = %ld", img_file, size);
+  if(fp) printf("The image is %s, size = %ld\n", img_file, size);
   else printf("Error loading img.\n");
 
   fseek(fp, 0, SEEK_SET);
   int ret = fread(pmem, size, 4, fp);
 
   fclose(fp);
-  return 0;
+  return size;
 }
 
-static uint8_t *gest_to_host(uint32_t paddr) {
+uint8_t *guest_to_host(uint32_t paddr) {
   return pmem + paddr - CONFIG_MBASE;
 } 
 
@@ -100,7 +100,7 @@ static inline void host_write(void *addr, int len, uint32_t data) {
 }
 
 static uint32_t pmem_read(uint32_t addr, int len) {
-  uint32_t ret = host_read(gest_to_host(addr), len);
+  uint32_t ret = host_read(guest_to_host(addr), len);
   return ret;
 }
 
@@ -176,7 +176,7 @@ extern "C" void vaddr_write(int waddr, int wdata, int len, char wmask) {
   // printf("waddr:%x\twaddr - CONFIG_MBASE:%x\n", waddr, waddr - CONFIG_MBASE);
   // pmem[(waddr - CONFIG_MBASE) >> 2] = (pmem[(waddr - CONFIG_MBASE) >> 2] & ~wmask_4byte) | ((wdata << one_pos * 8) & wmask_4byte);
   // pmem[(waddr - CONFIG_MBASE)] = (pmem[(waddr - CONFIG_MBASE)] & ~wmask_4byte) | ((wdata << one_pos * 8) & wmask_4byte);
-  host_write(gest_to_host(waddr), len, wdata);
+  host_write(guest_to_host(waddr), len, wdata);
   if(g_print_step) {
     if(call_count_2 > 1) call_count_2 = 0; 
     else call_count_2 ++;

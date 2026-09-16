@@ -47,6 +47,7 @@ VM_USER_CLASSES = \
   cpu \
   main \
   mem \
+  dut \
   expr \
   sdb \
   ftrace \
@@ -61,6 +62,7 @@ VM_USER_DIR = \
   ../csrc \
   ../csrc/cpu \
   ../csrc/memory \
+  ../csrc/monitor/difftest \
   ../csrc/monitor/sdb \
   ../csrc/monitor/trace \
   ../csrc/monitor/utils \
@@ -80,6 +82,8 @@ cpu.o: /home/xierry/ysyx-workbench/npc/csrc/cpu/cpu.cpp
 main.o: /home/xierry/ysyx-workbench/npc/csrc/main.cpp 
 	$(OBJCACHE) $(CXX) $(CXXFLAGS) $(CPPFLAGS) $(OPT_FAST)  -c -o $@ $<
 mem.o: /home/xierry/ysyx-workbench/npc/csrc/memory/mem.cpp 
+	$(OBJCACHE) $(CXX) $(CXXFLAGS) $(CPPFLAGS) $(OPT_FAST)  -c -o $@ $<
+dut.o: /home/xierry/ysyx-workbench/npc/csrc/monitor/difftest/dut.cpp 
 	$(OBJCACHE) $(CXX) $(CXXFLAGS) $(CPPFLAGS) $(OPT_FAST)  -c -o $@ $<
 expr.o: /home/xierry/ysyx-workbench/npc/csrc/monitor/sdb/expr.cpp 
 	$(OBJCACHE) $(CXX) $(CXXFLAGS) $(CPPFLAGS) $(OPT_FAST)  -c -o $@ $<

@@ -21,6 +21,8 @@ extern "C" {
 }
 #endif
 
+uint8_t *guest_to_host(uint32_t paddr); 
+
 uint32_t paddr_read(int raddr, int len);
 
 // #endif

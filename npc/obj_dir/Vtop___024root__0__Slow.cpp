@@ -275,8 +275,8 @@ VL_ATTR_COLD void Vtop___024root___stl_sequent__TOP__0(Vtop___024root* vlSelf) {
                                                                                 (3U 
                                                                                 & (- (IData)(
                                                                                 (3U 
-                                                                                == (IData)(vlSelfRef.top__DOT__u2__DOT__op_encoded))))))))))), vlSelfRef.__Vfunc_top__DOT__u5__DOT__vaddr_read__5__Vfuncout);
-        vlSelfRef.top__DOT__M_rdata = vlSelfRef.__Vfunc_top__DOT__u5__DOT__vaddr_read__5__Vfuncout;
+                                                                                == (IData)(vlSelfRef.top__DOT__u2__DOT__op_encoded))))))))))), vlSelfRef.__Vfunc_top__DOT__u5__DOT__vaddr_read__6__Vfuncout);
+        vlSelfRef.top__DOT__M_rdata = vlSelfRef.__Vfunc_top__DOT__u5__DOT__vaddr_read__6__Vfuncout;
     } else {
         vlSelfRef.top__DOT__M_rdata = 0U;
     }
@@ -477,7 +477,7 @@ VL_ATTR_COLD void Vtop___024root___ctor_var_reset(Vtop___024root* vlSelf) {
     vlSelf->top__DOT__u3__DOT__M_wen = VL_SCOPED_RAND_RESET_I(1, __VscopeHash, 5932320230445147276ull);
     vlSelf->top__DOT__u3__DOT__M_waddr = VL_SCOPED_RAND_RESET_I(32, __VscopeHash, 7724367165059228144ull);
     vlSelf->top__DOT__u3__DOT__result = VL_SCOPED_RAND_RESET_I(32, __VscopeHash, 18191861765634538509ull);
-    vlSelf->__Vfunc_top__DOT__u5__DOT__vaddr_read__5__Vfuncout = 0;
+    vlSelf->__Vfunc_top__DOT__u5__DOT__vaddr_read__6__Vfuncout = 0;
     vlSelf->__Vtableidx1 = 0;
     vlSelf->__VdfgRegularize_h6e95ff9d_0_0 = 0;
     for (int __Vi0 = 0; __Vi0 < 1; ++__Vi0) {

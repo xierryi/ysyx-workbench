@@ -29,6 +29,9 @@ VERILATOR_INPUT := $(VSRC) $(CSRC)
 
 VERILATOR_FLAGS += -I$(NPC_HOME)/csrc/tools/capstone/repo/include
 
+NEMU_DIFF = $(NEMU_HOME)/build/riscv32-nemu-interpreter-so
+# NEMU_DIFF = $(NPC_HOME)/csrc/tools/nemu-diff/riscv32-nemu-interpreter-so
+
 default: sim
 
 all:
@@ -44,7 +47,7 @@ sim:
 
 	@echo	
 	@echo "--RUN----------------------"
-	obj_dir/Vtop $(IMG).bin $(IMG).elf 
+	obj_dir/Vtop $(IMG).bin $(IMG).elf $(NEMU_DIFF) 
 
 clean:
 	rm -rf obj_dir/

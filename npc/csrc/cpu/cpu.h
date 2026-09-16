@@ -6,7 +6,7 @@
 #define MAX_INST_TO_PRINT 10
 
 enum {
-  NPC_RUNNING, NPC_STOP, NPC_END
+  NPC_RUNNING, NPC_STOP, NPC_END, NPC_ABORT
 };
 
 typedef struct
@@ -16,12 +16,16 @@ typedef struct
     int halt_pc;
 } NPCState;
 
+extern NPCState npc_state;
+
 typedef struct
 {
     int pc;
-} CPU;
+    int gpr[16];
 
-extern CPU cpu;
+} CPU_state;
+
+extern CPU_state cpu;
 
 void cpu_exec(int n);
 extern "C" void npc_trap(int pc, int halt_ret);  

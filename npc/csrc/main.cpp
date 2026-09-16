@@ -6,6 +6,9 @@
 #include "monitor/sdb/expr.h"
 #include "monitor/utils/disasm.h"
 #include "monitor/trace/ftrace.h"
+#include "monitor/difftest/dut.h"
+
+static int difftest_port = 1234;
 
 int main(int argc, char** argv) {
   /* init the verilator config */
@@ -15,10 +18,16 @@ int main(int argc, char** argv) {
   printf("file_img:%s\n",argv[1]);
 
   /* load $(img).bin */
-  load_img(argc, argv);
+  long img_size = load_img(argc, argv);
 
   /* load $(img).elf for ftrace */
   load_elf(argv[2]);
+
+  /* load shared object for difftest */
+  char *diff_so_file = argv[3];
+
+  printf("so:%s\n",argv[3]);
+
 
   /* init the regex for sdb */
   init_regex();
@@ -31,6 +40,9 @@ int main(int argc, char** argv) {
 
   /* state initialize */
   cpu_init();
+
+  /* differential test init */
+  init_difftest(diff_so_file, img_size, difftest_port);
 
   /* sdb loop */
   sdb_mainloop();

@@ -17,7 +17,7 @@ VerilatedContext* contextp = new VerilatedContext;
 Vtop* top = new Vtop{contextp};
 
 NPCState npc_state = {.state = NPC_STOP};
-CPU cpu;
+CPU_state cpu;
 
 void system_init(int argc, char **argv) {
     contextp->commandArgs(argc, argv);
@@ -59,7 +59,7 @@ void cpu_exec(int n) {
   unsigned int n_U = (unsigned int) n;
   g_print_step = (n_U < MAX_INST_TO_PRINT);
   switch (npc_state.state) {
-    case NPC_END:
+    case NPC_END: case NPC_ABORT:
       printf("Program execution has ended. To restart the program, exit NPC and run again.\n");
       return;
     default: npc_state.state = NPC_RUNNING;
@@ -81,6 +81,12 @@ void cpu_exec(int n) {
         case 1: printf(BOLD RED "HIT BAD TRAP" RESET); break;
       }
       printf(" at pc = 0x%.8x\n", npc_state.halt_pc);
+      break;
+    case NPC_ABORT:
+      printf(BOLD BLUE "npc: " RESET);
+      printf(BOLD RED "HIT BAD TRAP" RESET); 
+      printf(" at pc = 0x%.8x\n", npc_state.halt_pc);
+      break;
   }
 }
 

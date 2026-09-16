@@ -40,6 +40,18 @@ void Vtop___024root____Vdpiimwrap_top__DOT__u1__DOT__cpu_get_pc_TOP(IData/*31:0*
     cpu_get_pc(pc__Vcvt);
 }
 
+extern "C" void difftest_step(int pc, int npc);
+
+void Vtop___024root____Vdpiimwrap_top__DOT__u1__DOT__u0__DOT__difftest_step_TOP(IData/*31:0*/ pc, IData/*31:0*/ npc) {
+    VL_DEBUG_IF(VL_DBG_MSGF("+    Vtop___024root____Vdpiimwrap_top__DOT__u1__DOT__u0__DOT__difftest_step_TOP\n"); );
+    // Body
+    int pc__Vcvt;
+    pc__Vcvt = pc;
+    int npc__Vcvt;
+    npc__Vcvt = npc;
+    difftest_step(pc__Vcvt, npc__Vcvt);
+}
+
 extern "C" void ftrace_get_addr(int inst_addr, int func_addr, char rs1, char rd, int imm);
 
 void Vtop___024root____Vdpiimwrap_top__DOT__u2__DOT__ftrace_get_addr_TOP(IData/*31:0*/ inst_addr, IData/*31:0*/ func_addr, CData/*7:0*/ rs1, CData/*7:0*/ rd, IData/*31:0*/ imm) {
@@ -278,8 +290,8 @@ void Vtop___024root___ico_sequent__TOP__0(Vtop___024root* vlSelf) {
                                                                                 (3U 
                                                                                 & (- (IData)(
                                                                                 (3U 
-                                                                                == (IData)(vlSelfRef.top__DOT__u2__DOT__op_encoded))))))))))), vlSelfRef.__Vfunc_top__DOT__u5__DOT__vaddr_read__5__Vfuncout);
-        vlSelfRef.top__DOT__M_rdata = vlSelfRef.__Vfunc_top__DOT__u5__DOT__vaddr_read__5__Vfuncout;
+                                                                                == (IData)(vlSelfRef.top__DOT__u2__DOT__op_encoded))))))))))), vlSelfRef.__Vfunc_top__DOT__u5__DOT__vaddr_read__6__Vfuncout);
+        vlSelfRef.top__DOT__M_rdata = vlSelfRef.__Vfunc_top__DOT__u5__DOT__vaddr_read__6__Vfuncout;
     } else {
         vlSelfRef.top__DOT__M_rdata = 0U;
     }
@@ -456,13 +468,13 @@ void Vtop___024root___nba_sequent__TOP__0(Vtop___024root* vlSelf) {
     CData/*0:0*/ __VdlySet__top__DOT__u0__DOT__rf__v0;
     __VdlySet__top__DOT__u0__DOT__rf__v0 = 0;
     // Body
-    __VdlySet__top__DOT__u0__DOT__rf__v0 = 0U;
     if ((8U == (IData)(vlSelfRef.top__DOT__u2__DOT__op_encoded))) {
         Vtop___024root____Vdpiimwrap_top__DOT__u3__DOT__npc_trap_TOP(vlSelfRef.top__DOT__pc, vlSelfRef.top__DOT__u0__DOT__rf
                                                                      [
                                                                      (0x0000000fU 
                                                                       & (IData)(vlSelfRef.top__DOT__u2__DOT__rs1))]);
     }
+    __VdlySet__top__DOT__u0__DOT__rf__v0 = 0U;
     if (((1U == (IData)(vlSelfRef.top__DOT__u2__DOT__op_type)) 
          | ((4U == (IData)(vlSelfRef.top__DOT__u2__DOT__op_type)) 
             | (0U == (IData)(vlSelfRef.top__DOT__u2__DOT__op_type))))) {
@@ -494,12 +506,18 @@ void Vtop___024root___nba_sequent__TOP__1(Vtop___024root* vlSelf) {
     VL_DEBUG_IF(VL_DBG_MSGF("+    Vtop___024root___nba_sequent__TOP__1\n"); );
     Vtop__Syms* const __restrict vlSymsp VL_ATTR_UNUSED = vlSelf->vlSymsp;
     auto& vlSelfRef = std::ref(*vlSelf).get();
+    // Locals
+    IData/*31:0*/ __Vdly__top__DOT__pc;
+    __Vdly__top__DOT__pc = 0;
     // Body
+    __Vdly__top__DOT__pc = vlSelfRef.top__DOT__pc;
     if (vlSelfRef.rst_pc) {
-        vlSelfRef.top__DOT__pc = vlSelfRef.d_init_pc;
+        __Vdly__top__DOT__pc = vlSelfRef.d_init_pc;
     } else if (vlSelfRef.wen_pc) {
-        vlSelfRef.top__DOT__pc = vlSelfRef.top__DOT__u2__DOT__dnpc;
+        Vtop___024root____Vdpiimwrap_top__DOT__u1__DOT__u0__DOT__difftest_step_TOP(vlSelfRef.top__DOT__pc, vlSelfRef.top__DOT__u2__DOT__dnpc);
+        __Vdly__top__DOT__pc = vlSelfRef.top__DOT__u2__DOT__dnpc;
     }
+    vlSelfRef.top__DOT__pc = __Vdly__top__DOT__pc;
     Vtop___024root____Vdpiimwrap_top__DOT__u1__DOT__cpu_get_pc_TOP(vlSelfRef.top__DOT__pc);
     if (vlSelfRef.wen_pc) {
         Vtop___024root____Vdpiimwrap_top__DOT__u1__DOT__vaddr_ifetch_TOP(vlSelfRef.top__DOT__pc, 4U, vlSelfRef.top__DOT__u1__DOT____VlemCall_0__vaddr_ifetch);
@@ -654,8 +672,8 @@ void Vtop___024root___nba_comb__TOP__0(Vtop___024root* vlSelf) {
                                                                                 (3U 
                                                                                 & (- (IData)(
                                                                                 (3U 
-                                                                                == (IData)(vlSelfRef.top__DOT__u2__DOT__op_encoded))))))))))), vlSelfRef.__Vfunc_top__DOT__u5__DOT__vaddr_read__5__Vfuncout);
-        vlSelfRef.top__DOT__M_rdata = vlSelfRef.__Vfunc_top__DOT__u5__DOT__vaddr_read__5__Vfuncout;
+                                                                                == (IData)(vlSelfRef.top__DOT__u2__DOT__op_encoded))))))))))), vlSelfRef.__Vfunc_top__DOT__u5__DOT__vaddr_read__6__Vfuncout);
+        vlSelfRef.top__DOT__M_rdata = vlSelfRef.__Vfunc_top__DOT__u5__DOT__vaddr_read__6__Vfuncout;
     } else {
         vlSelfRef.top__DOT__M_rdata = 0U;
     }

@@ -3,6 +3,8 @@
 
 #include <stdint.h>
 
+#define NR_GPR 16
+
 void isa_reg_display();
 
 extern "C" int reg_get_val(int idx); 
