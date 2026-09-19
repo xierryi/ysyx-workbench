@@ -6,7 +6,7 @@ module ysyx_26060173_WBU(
 /* verilator lint_off UNUSEDSIGNAL */
     input [4:0] rd,
 /* verilator lint_on UNUSEDSIGNAL */
-    input [31:0] result,
+    input [31:0] dst,
 
     // write into reg
     output [3:0] waddr,
@@ -16,7 +16,7 @@ module ysyx_26060173_WBU(
     output [31:0] d_pcreg
 );
 assign waddr = rd[3:0];
-assign wdata = result;
+assign wdata = dst;
 assign d_pcreg = dnpc;
 
 endmodule

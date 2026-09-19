@@ -16,7 +16,7 @@ int load_img(int argc, char** argv);
 extern "C" {
 #endif
     int vaddr_ifetch(int raddr, int len); 
-    void vaddr_write(int waddr, int wdata, int len, char wmask); 
+    void vaddr_write(int waddr, int wdata, int len); 
 #ifdef __cplusplus
 }
 #endif

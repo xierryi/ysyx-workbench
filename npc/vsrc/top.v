@@ -23,20 +23,19 @@ wire M_wen;
 wire [31:0] M_waddr;
 wire [1:0] M_wlen;
 wire [31:0] M_wdata;
-wire [7:0] M_wmask;
 wire [31:0] M_rdata;
 wire [31:0] M_raddr; 
 wire [1:0] M_rlen;
 
 // input operand of EXU
-wire [3:0] op_encoded;
-wire [31:0] operand1;
-wire [31:0] operand2;
-wire [31:0] operand3;
+wire [7:0] op_encoded;
+wire [31:0] src1;
+wire [31:0] src2;
+wire [31:0] imm;
 
 // input of WBU
 wire [4:0] rd;
-wire [31:0] result;
+wire [31:0] dst;
 wire [31:0] dnpc;
 
 // output of WBU 
@@ -73,9 +72,9 @@ ysyx_26060173_IDU u2(
     .rdata2(rdata2),
     .raddr1(raddr1),
     .raddr2(raddr2),
-    .operand1(operand1),
-    .operand2(operand2),
-    .operand3(operand3),
+    .src1(src1),
+    .src2(src2),
+    .imm(imm),
     .op_encoded(op_encoded),
     .rd(rd),
     .pc(pc),
@@ -85,12 +84,12 @@ ysyx_26060173_IDU u2(
 ysyx_26060173_EXU u3(
     .clk(clk),
     .op_encoded(op_encoded),
-    .operand1(operand1),
-    .operand2(operand2),
-    .operand3(operand3),
+    .src1(src1),
+    .src2(src2),
+    .imm(imm),
     .pc(pc),
     .M_rdata(M_rdata),
-    .result(result),
+    .dst(dst),
     .M_ren(M_ren),
     .M_wen(M_wen),
     .M_raddr(M_raddr),
@@ -98,14 +97,13 @@ ysyx_26060173_EXU u3(
     .M_waddr(M_waddr),
     .M_wlen(M_wlen),
     .M_wdata(M_wdata),
-    .M_wmask(M_wmask),
     .dnpc(dnpc)
 );
 
 ysyx_26060173_WBU u4(
     .dnpc(dnpc),
     .rd(rd),
-    .result(result),
+    .dst(dst),
     .waddr(waddr),
     .wdata(wdata),
     .d_pcreg(d_pcreg)
@@ -117,7 +115,6 @@ ysyx_26060173_LSU u5(
     .waddr(M_waddr),
     .wlen(M_wlen),
     .wdata(M_wdata),
-    .wmask(M_wmask),
     .raddr(M_raddr),
     .rlen(M_rlen),
     .rdata(M_rdata)

@@ -28,6 +28,7 @@ CSRC := $(shell find $(abspath ./csrc) -name "*.cpp")
 VERILATOR_INPUT := $(VSRC) $(CSRC)
 
 VERILATOR_FLAGS += -I$(NPC_HOME)/csrc/tools/capstone/repo/include
+VERILATOR_FLAGS += -I$(VSRC_DIR)/include
 
 NEMU_DIFF = $(NEMU_HOME)/build/riscv32-nemu-interpreter-so
 # NEMU_DIFF = $(NPC_HOME)/csrc/tools/nemu-diff/riscv32-nemu-interpreter-so

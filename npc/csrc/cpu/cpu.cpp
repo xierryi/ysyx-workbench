@@ -96,5 +96,5 @@ void system_free() {
 }
 
 int system_isGoodret() {
-  return (npc_state.halt_ret == 0) ? 0 : 1;
+  return (npc_state.state == NPC_END && npc_state.halt_ret == 0) ? 0 : 1;
 }

@@ -144,7 +144,7 @@ extern "C" int vaddr_ifetch(int raddr, int len) {
   return inst; // avoid any shift in RTL
 }
 // store inst api
-extern "C" void vaddr_write(int waddr, int wdata, int len, char wmask) {
+extern "C" void vaddr_write(int waddr, int wdata, int len) {
   // 总是往地址为`waddr & ~0x3u`的4字节按写掩码`wmask`写入`wdata`
   // `wmask`中每比特表示`wdata`中1个字节的掩码,
   // 如`wmask = 0x3`代表只写入最低2个字节, 内存中的其它字节保持不变
@@ -162,17 +162,17 @@ extern "C" void vaddr_write(int waddr, int wdata, int len, char wmask) {
     return;
   }
 
-  unsigned wmask_buf = wmask;
-  unsigned char wmask_byte[4];
-  /* hex to binary */
-  wmask_byte[3] = (wmask_buf / 8) * 0xFF; wmask_buf = wmask_buf % 8;
-  wmask_byte[2] = (wmask_buf / 4) * 0xFF; wmask_buf = wmask_buf % 4;
-  wmask_byte[1] = (wmask_buf / 2) * 0xFF; wmask_buf = wmask_buf % 2;
-  wmask_byte[0] = (wmask_buf)     * 0xFF;
+  // unsigned wmask_buf = wmask;
+  // unsigned char wmask_byte[4];
+  // /* hex to binary */
+  // wmask_byte[3] = (wmask_buf / 8) * 0xFF; wmask_buf = wmask_buf % 8;
+  // wmask_byte[2] = (wmask_buf / 4) * 0xFF; wmask_buf = wmask_buf % 4;
+  // wmask_byte[1] = (wmask_buf / 2) * 0xFF; wmask_buf = wmask_buf % 2;
+  // wmask_byte[0] = (wmask_buf)     * 0xFF;
 
-  /* get bit mask */
-  int wmask_4byte = (wmask_byte[3] << 24) + (wmask_byte[2] << 16) + (wmask_byte[1] << 8) + wmask_byte[0]; 
-  char one_pos = log2(wmask & -wmask);
+  // /* get bit mask */
+  // int wmask_4byte = (wmask_byte[3] << 24) + (wmask_byte[2] << 16) + (wmask_byte[1] << 8) + wmask_byte[0]; 
+  // char one_pos = log2(wmask & -wmask);
   // printf("waddr:%x\twaddr - CONFIG_MBASE:%x\n", waddr, waddr - CONFIG_MBASE);
   // pmem[(waddr - CONFIG_MBASE) >> 2] = (pmem[(waddr - CONFIG_MBASE) >> 2] & ~wmask_4byte) | ((wdata << one_pos * 8) & wmask_4byte);
   // pmem[(waddr - CONFIG_MBASE)] = (pmem[(waddr - CONFIG_MBASE)] & ~wmask_4byte) | ((wdata << one_pos * 8) & wmask_4byte);
