@@ -157,6 +157,7 @@ ysyx_26060173_MuxKeyWithDefault #(8, 8, 32) u9(
 );
 
 /* ebreak match and execute module */
+`ifdef ysyx_26060173_SIMULATION
 import "DPI-C" function void npc_trap (input int pc, input int halt_ret);
 always @(posedge clk) begin
     if(op_encoded == ebreak_encoded) begin
@@ -164,5 +165,6 @@ always @(posedge clk) begin
         npc_trap(pc, src1);
     end
 end
+`endif
 
 endmodule

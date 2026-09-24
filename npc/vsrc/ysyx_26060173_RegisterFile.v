@@ -16,12 +16,22 @@ module ysyx_26060173_RegisterFile #(ADDR_WIDTH = 1, DATA_WIDTH = 1) (
       end
   end
 
-  assign rf[0] = 0; // R[0] = 0
+  `ifdef ysyx_26060173_SIMULATION
+  assign rf[0] = 0;
+  `else
+  always @* begin
+    rf[0] = 0; // R[0] = 0
+  end
+  `endif
+
   assign rdata1 = rf[raddr1]; // rdata1 = R[raddr1]
   assign rdata2 = rf[raddr2]; // rdata2 = R[raddr2]
 
+`ifdef ysyx_26060173_SIMULATION
 import "DPI-C" function void reg_get_val(input int idx, input int val);
 always @(*) begin
   for(int i = 0; i < 16; i ++) reg_get_val(i, rf[i]); // call
 end
+`endif
+
 endmodule

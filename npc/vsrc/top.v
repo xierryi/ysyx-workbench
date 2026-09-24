@@ -3,6 +3,22 @@ module top(
     input rst_pc,
     input wen_pc,
     input [31:0] d_init_pc
+
+    `ifdef ysyx_26060173_SYNTHESIS
+    ,
+    // ---- 指令存储器接口（综合时对外）----
+    output [31:0] imem_addr,
+    input  [31:0] imem_rdata,
+    // ---- 数据存储器接口（综合时对外）----
+    output        dmem_ren,
+    output        dmem_wen,
+    output [31:0] dmem_raddr,
+    output [1:0]  dmem_rlen,
+    output [31:0] dmem_waddr,
+    output [1:0]  dmem_wlen,
+    output [31:0] dmem_wdata,
+    input  [31:0] dmem_rdata
+    `endif
 );
 // output of IFU module
 wire [31:0] inst;
@@ -40,6 +56,22 @@ wire [31:0] dnpc;
 
 // output of WBU 
 wire [31:0] d_pcreg;
+
+`ifdef ysyx_26060173_SYNTHESIS
+assign imem_addr = pc;
+assign inst      = imem_rdata;
+
+// 访存：把 LSU 的请求引出，把返回数据接回
+assign dmem_ren   = M_ren;
+assign dmem_wen   = M_wen;
+assign dmem_raddr = M_raddr;
+assign dmem_rlen  = M_rlen;
+assign dmem_waddr = M_waddr;
+assign dmem_wlen  = M_wlen;
+assign dmem_wdata = M_wdata;
+assign M_rdata    = dmem_rdata;
+
+`endif
 
 ysyx_26060173_RegisterFile #(
     4,

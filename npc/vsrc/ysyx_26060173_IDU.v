@@ -65,12 +65,13 @@ assign src2 = rdata2;
 /* interfaces for LSU */
 assign wen = (op_type == R_type) || (op_type == I_type) || (op_type == U_type) || (op_type == J_type);
 
-import "DPI-C" function void ftrace_get_addr(input int inst_addr, input int func_addr, 
-    input byte rs1, input byte rd, input int imm);
+`ifdef ysyx_26060173_SIMULATION
+import "DPI-C" function void ftrace_get_addr(input int inst_addr, input int func_addr, input byte rs1, input byte rd, input int imm);
 always @(*) begin
     if(op_encoded == jalr_encoded || op_encoded == jal_encoded) begin
        ftrace_get_addr(pc, dnpc, {3'b0, rs1}, {3'b0, rd}, imm);
     end
 end
+`endif
 
 endmodule

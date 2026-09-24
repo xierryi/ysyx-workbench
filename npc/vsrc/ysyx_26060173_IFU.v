@@ -17,6 +17,7 @@ ysyx_26060173_PCRegister #(32) u0(
     .pc(pc)
 );
 
+`ifdef ysyx_26060173_SIMULATION
 import "DPI-C" function int vaddr_ifetch(input int raddr, input int len);
 always @(*) begin
     inst = wen ? vaddr_ifetch(pc, 4) : 0; 
@@ -26,5 +27,6 @@ import "DPI-C" function void cpu_get_pc(input int pc);
 always @(*) begin
     cpu_get_pc(pc);
 end    
+`endif
 
 endmodule

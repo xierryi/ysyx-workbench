@@ -32,7 +32,7 @@ ysyx_26060173_MuxKey #(3, 2, 32) u1(
     })
 );
 /* verilator lint_on UNUSEDSIGNAL */
-
+`ifdef ysyx_26060173_SIMULATION
 import "DPI-C" function int vaddr_read(input int raddr, input int len);
 import "DPI-C" function void vaddr_write(
   input int waddr, input int wdata, input int len);
@@ -48,5 +48,6 @@ always @(*) begin
         vaddr_write(waddr, wdata, wlen_num);
     end
 end
+`endif
 
 endmodule
