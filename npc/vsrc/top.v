@@ -27,15 +27,12 @@ wire [31:0] pc;
 // regfiles interfaces
 wire [3:0] waddr; 
 wire [31:0] wdata;
-wire wen;
 wire [3:0] raddr1; 
 wire [3:0] raddr2; 
 wire [31:0] rdata1;
 wire [31:0] rdata2;
 
 // LSU interfaces
-wire M_ren;
-wire M_wen;
 wire [31:0] M_waddr;
 wire [1:0] M_wlen;
 wire [31:0] M_wdata;
@@ -43,8 +40,22 @@ wire [31:0] M_rdata;
 wire [31:0] M_raddr; 
 wire [1:0] M_rlen;
 
-// input operand of EXU
-wire [7:0] op_encoded;
+// Control Signal
+wire [1:0] Branch;
+wire isB_type;
+wire B_en;
+wire [1:0] RegIn;
+wire ALUIn1Sel;
+wire ALUIn2Sel;
+wire R_wen;
+wire M_wen;
+wire M_ren;
+// wire EandCSR;
+wire ebreak;
+
+wire [2:0] funct3;
+wire inst_30;
+
 wire [31:0] src1;
 wire [31:0] src2;
 wire [31:0] imm;
@@ -80,7 +91,7 @@ ysyx_26060173_RegisterFile #(
     .clk(clk),
     .wdata(wdata),
     .waddr(waddr),
-    .wen(wen),
+    .wen(R_wen),
     .raddr1(raddr1),
     .raddr2(raddr2),
     .rdata1(rdata1),
@@ -99,7 +110,6 @@ ysyx_26060173_IFU u1(
 
 ysyx_26060173_IDU u2(
     .inst(inst),
-    .wen(wen),
     .rdata1(rdata1),
     .rdata2(rdata2),
     .raddr1(raddr1),
@@ -107,7 +117,18 @@ ysyx_26060173_IDU u2(
     .src1(src1),
     .src2(src2),
     .imm(imm),
-    .op_encoded(op_encoded),
+    .B_en(B_en),
+    .Branch(Branch),
+    .isB_type(isB_type),
+    .RegIn(RegIn),
+    .ALUIn1Sel(ALUIn1Sel),
+    .ALUIn2Sel(ALUIn2Sel),
+    .R_wen(R_wen),
+    .M_ren(M_ren),
+    .M_wen(M_wen),
+    .ebreak(ebreak),
+    .funct3(funct3),
+    .inst_30(inst_30),
     .rd(rd),
     .pc(pc),
     .dnpc(dnpc)
@@ -115,20 +136,28 @@ ysyx_26060173_IDU u2(
 
 ysyx_26060173_EXU u3(
     .clk(clk),
-    .op_encoded(op_encoded),
+    .Branch(Branch),
+    .isB_type(isB_type),
+    .B_en(B_en),
+    .RegIn(RegIn),
+    .ALUIn1Sel(ALUIn1Sel),
+    .ALUIn2Sel(ALUIn2Sel),
+    .M_ren(M_ren),
+    .M_wen(M_wen),
+    .ebreak(ebreak),
+    .funct3(funct3),
+    .inst_30(inst_30),
     .src1(src1),
     .src2(src2),
     .imm(imm),
     .pc(pc),
     .M_rdata(M_rdata),
-    .dst(dst),
-    .M_ren(M_ren),
-    .M_wen(M_wen),
     .M_raddr(M_raddr),
     .M_rlen(M_rlen),
     .M_waddr(M_waddr),
     .M_wlen(M_wlen),
     .M_wdata(M_wdata),
+    .dst(dst),
     .dnpc(dnpc)
 );
 
@@ -153,16 +182,16 @@ ysyx_26060173_LSU u5(
 );
 
 /* test module */
-always @(posedge clk) begin
+// always (posedge clk) begin
     // $display("PC: %x", pc);
     // $display("inst: %x", inst);
     // $display("rdata1: %x", rdata1);
     // $display("rdata2: %x", rdata2);
     // $display("raddr1: %x", raddr1);
     // $display("raddr2: %x", raddr2);
-    // $display("operand3: %x", operand3);
-    // $display("operand1: %x", operand1);
-    // $display("operand2: %x", operand2);
+    // $display("imm: %x", imm);
+    // $display("src1: %x", src1);
+    // $display("src2: %x", src2);
     // $display("waddr: %x", waddr);
     // $display("wdata: %x", wdata);
     // $display("M_rdata: %x", M_rdata);
@@ -174,8 +203,9 @@ always @(posedge clk) begin
     // $display("M_wen: %x", M_wen);
     // $display("M_wdata: %x", M_wdata);
     // $display("op_encoded: %d", op_encoded);
+    // $display("ebreak: %x", ebreak);
 
     // $display("   ");
-end
+// end
 
 endmodule

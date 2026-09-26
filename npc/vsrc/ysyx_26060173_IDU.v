@@ -1,10 +1,7 @@
-`include "ysyx_26060173_opcode_defs.vh"
-`include "ysyx_26060173_optype_defs.vh"
+`include "ysyx_26060173_defines.v"
 module ysyx_26060173_IDU(
     input [31:0] inst,
 
-    // reg write enable
-    output wen,
     // read from reg 
     input [31:0] rdata1,
     input [31:0] rdata2,
@@ -15,7 +12,22 @@ module ysyx_26060173_IDU(
     output [31:0] src1,
     output [31:0] src2,
     output [31:0] imm,
-    output [7:0] op_encoded,
+
+    // ctrl signal
+    input B_en,
+    output [1:0] Branch,
+    output isB_type,
+    output [1:0] RegIn,
+    output ALUIn1Sel,
+    output ALUIn2Sel,
+    output R_wen,
+    output M_wen,
+    output M_ren,
+    // output EandCSR,
+    output ebreak,
+
+    output [2:0] funct3,
+    output inst_30,
 
     // decode signal from inst
     output [4:0] rd,
@@ -25,19 +37,25 @@ module ysyx_26060173_IDU(
     input [31:0] dnpc
 );
 
-/* opcode encoded module */
+wire [6:0] opcode;
 
-ysyx_26060173_OPENCODED #(8, 38) u0(
-    .inst(inst),
-    .op_encoded(op_encoded)
-);
+assign opcode = inst[6:0];
+assign funct3 = inst[14:12];
+assign inst_30 = inst[30];
 
-/* opcode type module */
-wire [2:0] op_type;
-
-ysyx_26060173_OPENTYPE_ENCODED #(8, 37) u1(
-    .op_encoded(op_encoded),
-    .op_type(op_type)
+wire EandCSR;
+ysyx_26060173_Control u0(
+    .opcode(opcode),
+    .B_en(B_en),
+    .Branch(Branch),
+    .isB_type(isB_type),
+    .RegIn(RegIn),
+    .ALUIn1Sel(ALUIn1Sel),
+    .ALUIn2Sel(ALUIn2Sel),
+    .R_wen(R_wen),
+    .M_ren(M_ren),
+    .M_wen(M_wen),
+    .EandCSR(EandCSR)
 );
 
 /* field fetch module */
@@ -46,10 +64,16 @@ wire [4:0] rs1;
 wire [4:0] rs2;
 /* verilator lint_on UNUSEDSIGNAL */
 
-ysyx_26060173_FILED_FETCH #(8) u2(
+ysyx_26060173_EandCSR u1(
+    .inst_31_7(inst[31:7]),
+    .en(EandCSR),
+    .ebreak(ebreak)
+);
+
+ysyx_26060173_FieldFetch u2(
     .inst(inst),
-    .op_type(op_type),
-    .op_encoded(op_encoded),
+    .opcode(opcode),
+    .ebreak(ebreak),
     .rs1(rs1),
     .rs2(rs2),
     .rd(rd),
@@ -62,13 +86,11 @@ assign src1 = rdata1;
 assign raddr2 = rs2[3:0];
 assign src2 = rdata2;
 
-/* interfaces for LSU */
-assign wen = (op_type == R_type) || (op_type == I_type) || (op_type == U_type) || (op_type == J_type);
-
+/* TO DO!!! */
 `ifdef ysyx_26060173_SIMULATION
 import "DPI-C" function void ftrace_get_addr(input int inst_addr, input int func_addr, input byte rs1, input byte rd, input int imm);
 always @(*) begin
-    if(op_encoded == jalr_encoded || op_encoded == jal_encoded) begin
+    if(Branch == 2'b10) begin
        ftrace_get_addr(pc, dnpc, {3'b0, rs1}, {3'b0, rd}, imm);
     end
 end
