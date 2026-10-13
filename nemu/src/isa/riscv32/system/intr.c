@@ -25,6 +25,17 @@ word_t isa_raise_intr(word_t NO, vaddr_t epc) {
   csr[CSR_MCAUSE] = NO;         // SR[mcause] <- 一个描述失败原因的号码
   trap_addr = csr[CSR_MTVEC];  // PC <- SR[mtvec]
 
+  /* etrace part */
+#ifdef CONFIG_ETRACE
+  printf("\n[etrace]\n");
+  printf("--------------------------\n");
+  printf("mepc:\t\t" FMT_WORD"\n", csr[CSR_MEPC]);
+  printf("mcause:\t\t" FMT_WORD"\n", csr[CSR_MCAUSE]);
+  printf("mstatus:\t" FMT_WORD"\n", csr[CSR_MSTATUS]);
+  printf("mtvec:\t\t" FMT_WORD"\n", csr[CSR_MTVEC]);
+  printf("--------------------------\n");
+#endif
+
   return trap_addr;
   // return 0;
 }
