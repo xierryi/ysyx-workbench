@@ -23,6 +23,11 @@ bool isa_difftest_checkregs(CPU_state *ref_r, vaddr_t pc) {
   for(int i = 0; i < NR_GPR; i ++) {
     if(gpr(i) != ref_r->gpr[check_reg_idx(i)]) {
       printf("[DiffTest] errors at " FMT_WORD"\n" ,pc);
+      printf("-------------------------------------------------\n");
+      printf("| reg_name\t| dut\t\t| ref\t\t|\n");
+      printf("| %s\t\t| " FMT_WORD"\t| " FMT_WORD"\t|\n" , 
+        reg_name(i), gpr(i), ref_r->gpr[check_reg_idx(i)]);
+      printf("-------------------------------------------------\n");
       return false;
     }
   }

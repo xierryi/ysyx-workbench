@@ -6,7 +6,7 @@
 #include <elf.h>
 // FEAT ME with ELF64 
 
-elf_func func_list[64];
+elf_func func_list[128];
 int func_count = 0;
 
 void load_elf(char * elf_file) {
@@ -95,7 +95,7 @@ void load_elf(char * elf_file) {
         // printf("start_addr:0x%x\n", func_list[func_count].start_addr);
         // printf("end_addr:0x%x\n", func_list[func_count].end_addr);
         func_count ++; 
-        assert(func_count < 64);
+        assert(func_count < 128);
       }
     }
 
