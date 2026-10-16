@@ -55,9 +55,14 @@ Context *kcontext(Area kstack, void (*entry)(void *), void *arg) {
   // put context into bottom of the stack(aka top in addr)
   cp = kstack.end - CONTEXT_SIZE;
 
+  // set arg to a0
+  cp->gpr[10] = (uintptr_t)arg;
+
+  // set mstatus to meet requirement of difftest
+  cp->mstatus = 0x1800;
+
   // set return pc for kernel thread
   cp->mepc = (uintptr_t)entry;
-  
   return cp;
 }
 
