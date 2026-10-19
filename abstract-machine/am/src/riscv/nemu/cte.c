@@ -53,7 +53,7 @@ Context *kcontext(Area kstack, void (*entry)(void *), void *arg) {
   memset(kstack.start, 0, stack_size);
 
   // put context into bottom of the stack(aka top in addr)
-  cp = kstack.end - CONTEXT_SIZE;
+  cp = (Context *)((uintptr_t)kstack.end - CONTEXT_SIZE);
 
   // set arg to a0
   cp->gpr[10] = (uintptr_t)arg;

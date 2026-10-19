@@ -25,6 +25,12 @@ module ysyx_26060173_IDU(
     output M_ren,
     // output EandCSR,
     output ebreak,
+    output ecall,
+    output mret,
+    output csr,
+
+    output [11:0] SR_addr,
+    output SR_wen,
 
     output [2:0] funct3,
     output inst_30,
@@ -66,18 +72,24 @@ wire [4:0] rs2;
 
 ysyx_26060173_EandCSR u1(
     .inst_31_7(inst[31:7]),
+    .funct3(funct3),
     .en(EandCSR),
-    .ebreak(ebreak)
+    .ebreak(ebreak),
+    .ecall(ecall),
+    .mret(mret),
+    .csr(csr)
 );
 
 ysyx_26060173_FieldFetch u2(
     .inst(inst),
     .opcode(opcode),
     .ebreak(ebreak),
+    .csr(csr),
     .rs1(rs1),
     .rs2(rs2),
     .rd(rd),
-    .imm(imm)
+    .imm(imm),
+    .SR_addr(SR_addr)
 );
 
 /* interfaces for GPR and EXU */
@@ -85,6 +97,10 @@ assign raddr1 = rs1[3:0];
 assign src1 = rdata1;
 assign raddr2 = rs2[3:0];
 assign src2 = rdata2;
+
+/* interfaces for SR */
+assign SR_wen = ecall | csr;
+
 
 /* TO DO!!! */
 `ifdef ysyx_26060173_SIMULATION

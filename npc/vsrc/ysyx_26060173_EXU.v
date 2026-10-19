@@ -13,12 +13,17 @@ module ysyx_26060173_EXU(
     input M_wen,
     // output EandCSR,
     input ebreak,
+    input ecall,
+    input mret,
+    input csr,
+
+    input [31:0] SR_rdata,  // SR
 
     input [2:0] funct3,
     input inst_30,
 
-    input [31:0] src1,
-    input [31:0] src2,
+    input [31:0] src1, // reg
+    input [31:0] src2, // reg
     input [31:0] imm,
 
     // input of execute for jalr and ebreak 
@@ -108,8 +113,10 @@ ysyx_26060173_MuxKeyWithDefault #(2, 3, 32) M_rdataMUX(
 ); 
 
 /* RegIn Part */
+wire [31:0] dst_main;
+
 ysyx_26060173_MuxKey #(4, 2, 32) RegInMUX(
-    .key(RegIn), .out(dst), .lut({
+    .key(RegIn), .out(dst_main), .lut({
         2'b00   , ALUResult,
         2'b01   , M_rdatatoReg, 
         2'b10   , (pc + 4),
@@ -117,6 +124,11 @@ ysyx_26060173_MuxKey #(4, 2, 32) RegInMUX(
     })
 );
 
+ysyx_26060173_MuxKeyWithDefault #(1, 1, 32) dstMUX(
+    .key(1'b1), .out(dst), .default_out(dst_main), .lut({
+        csr     , SR_rdata
+    })
+);
 /* Branch Part */
 
 assign B_en = ALUResult[0];

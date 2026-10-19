@@ -7,10 +7,14 @@ module ysyx_26060173_FieldFetch (
 
     input [6:0] opcode,
     input ebreak,
+    input csr,
+
     output [4:0] rs1,
     output [4:0] rs2,
     output [4:0] rd,
-    output [31:0] imm
+    output [31:0] imm,
+
+    output [11:0] SR_addr
 );
 
 ysyx_26060173_MuxKey #(2, 1, 5) u0(
@@ -36,5 +40,11 @@ ysyx_26060173_MuxKey #(9, 7, 32) u1(
         ysyx_26060173_R_type, 32'b0
     })
 );
-    
+
+ysyx_26060173_MuxKeyWithDefault #(1, 1, 12) u2(
+    .key(csr), .out(SR_addr), .default_out('d0), .lut({
+        1'b1,   inst[31:20] 
+    })
+);
+
 endmodule

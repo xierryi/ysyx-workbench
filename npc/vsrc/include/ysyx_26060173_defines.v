@@ -1,6 +1,7 @@
 `ifndef __DEFINES_VH__
 `define __DEFINES_VH__
 
+// opcode: inst[6:0]
 parameter     ysyx_26060173_lui     =  7'b0110111;  // --               , --        , imm->reg  , pc = pc + 4
 parameter     ysyx_26060173_auipc   =  7'b0010111;  // pc  , imm->ALU   , ALU->reg  , --        , pc = pc + 4
 parameter     ysyx_26060173_jal     =  7'b1101111;  // pc  , imm->ALU   , ALU->dnpc , pc+4->reg,  pc = pc + 4

@@ -7,6 +7,9 @@ module ysyx_26060173_ALU(
     input ALUIn1Sel, 
     input ALUIn2Sel,
     input ebreak,
+    input ecall,
+    input mret,
+    input csr,
     input [31:0] ALUIn1,
     input [31:0] ALUIn2,
     output [31:0] ALUResult

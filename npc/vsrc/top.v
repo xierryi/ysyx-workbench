@@ -50,8 +50,18 @@ wire ALUIn2Sel;
 wire R_wen;
 wire M_wen;
 wire M_ren;
-// wire EandCSR;
+
+// EandCSR part
 wire ebreak;
+wire ecall;
+wire mret;
+wire csr;
+
+// System Register
+wire [11:0] SR_addr;
+wire [31:0] SR_wdata;
+wire SR_wen;
+wire [31:0] SR_rdata;
 
 wire [2:0] funct3;
 wire inst_30;
@@ -98,7 +108,18 @@ ysyx_26060173_RegisterFile #(
     .rdata2(rdata2)
 );
 
-ysyx_26060173_IFU u1(
+ysyx_26060173_SystemReg #(
+    3,
+    32
+) u1(
+    .clk(clk),
+    .addr(SR_addr),
+    .rdata(SR_rdata),
+    .wdata(SR_wdata),
+    .wen(SR_wen)
+);
+
+ysyx_26060173_IFU u2(
     .clk(clk), 
     .rst(rst_pc),
     .wen(wen_pc), 
@@ -108,7 +129,7 @@ ysyx_26060173_IFU u1(
     .inst(inst)
 );
 
-ysyx_26060173_IDU u2(
+ysyx_26060173_IDU u3(
     .inst(inst),
     .rdata1(rdata1),
     .rdata2(rdata2),
@@ -127,6 +148,11 @@ ysyx_26060173_IDU u2(
     .M_ren(M_ren),
     .M_wen(M_wen),
     .ebreak(ebreak),
+    .ecall(ecall),
+    .mret(mret),
+    .csr(csr),
+    .SR_addr(SR_addr),
+    .SR_wen(SR_wen),
     .funct3(funct3),
     .inst_30(inst_30),
     .rd(rd),
@@ -134,7 +160,7 @@ ysyx_26060173_IDU u2(
     .dnpc(dnpc)
 );
 
-ysyx_26060173_EXU u3(
+ysyx_26060173_EXU u4(
     .clk(clk),
     .Branch(Branch),
     .isB_type(isB_type),
@@ -145,6 +171,9 @@ ysyx_26060173_EXU u3(
     .M_ren(M_ren),
     .M_wen(M_wen),
     .ebreak(ebreak),
+    .ecall(ecall),
+    .mret(mret),
+    .csr(csr),
     .funct3(funct3),
     .inst_30(inst_30),
     .src1(src1),
@@ -161,7 +190,7 @@ ysyx_26060173_EXU u3(
     .dnpc(dnpc)
 );
 
-ysyx_26060173_WBU u4(
+ysyx_26060173_WBU u5(
     .dnpc(dnpc),
     .rd(rd),
     .dst(dst),
@@ -170,7 +199,7 @@ ysyx_26060173_WBU u4(
     .d_pcreg(d_pcreg)
 );
 
-ysyx_26060173_LSU u5(
+ysyx_26060173_LSU u6(
     .ren(M_ren),
     .wen(M_wen),
     .waddr(M_waddr),
