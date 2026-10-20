@@ -32,9 +32,10 @@ ysyx_26060173_MuxKeyWithDefault #(1, 25, 1) u2(
     })
 );
 
-ysyx_26060173_MuxKeyWithDefault #(1, 1, 1) u3(
-    .key(1'b1), .out(csr), .default_out(1'b0), .lut({
-        (funct3[0] | funct3[1] | funct3[2]), en
+ysyx_26060173_MuxKeyWithDefault #(2, 3, 1) u3(
+    .key(funct3), .out(csr), .default_out(1'b0), .lut({
+        3'b001 , en,
+        3'b010 , en
     })
 );
 

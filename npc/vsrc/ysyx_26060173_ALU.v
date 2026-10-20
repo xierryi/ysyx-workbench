@@ -7,13 +7,14 @@ module ysyx_26060173_ALU(
     input ALUIn1Sel, 
     input ALUIn2Sel,
     input ebreak,
-    input ecall,
-    input mret,
     input csr,
+    input csr_type,
     input [31:0] ALUIn1,
     input [31:0] ALUIn2,
     output [31:0] ALUResult
 );
+
+parameter CSR_CSRRS = 1'b1;
 
 wire isM;
 assign isM = M_ren | M_wen;
@@ -118,23 +119,29 @@ ysyx_26060173_Barrelshifter ShiftModule(
 /* LOGIC Module */
 wire LOGIC;
 wire [31:0] LOGICResult;
-wire LOGICfunct3;
 
-ysyx_26060173_MuxKeyWithDefault #(3, 3, 1) u3(
-    .key(funct3), .out(LOGICfunct3), .default_out(1'b0), .lut({
-        3'b100, 1'b1,
-        3'b110, 1'b1,
-        3'b111, 1'b1
+parameter LOGIC_NONE    = 2'b00;
+parameter LOGIC_OR      = 2'b01;
+parameter LOGIC_XOR     = 2'b10;
+parameter LOGIC_AND     = 2'b11;
+
+wire [1:0] LOGICfunc;
+
+ysyx_26060173_MuxKeyWithDefault #(3, 1, 2) u3(
+    .key(1'b1), .out(LOGICfunc), .default_out(LOGIC_NONE), .lut({
+        (3'b100 == funct3)                              , LOGIC_XOR,
+        (3'b110 == funct3) | (csr_type == CSR_CSRRS)    , LOGIC_OR,
+        (3'b111 == funct3)                              , LOGIC_AND
     }) 
 );
 
-assign LOGIC = ~isM & ~ebreak & ~isB_type &  ~ALUIn1Sel & LOGICfunct3;
+assign LOGIC = ~isM & ~ebreak & ~isB_type &  ~ALUIn1Sel & (~(LOGICfunc == LOGIC_NONE) | csr);
 
-ysyx_26060173_MuxKeyWithDefault #(3, 3, 32) LogicModule(
-    .key(funct3), .out(LOGICResult), .default_out(32'b0), .lut({
-        3'b100,  (ALUIn1 ^ ALUIn2),
-        3'b110,  (ALUIn1 | ALUIn2),
-        3'b111,  (ALUIn1 & ALUIn2)
+ysyx_26060173_MuxKeyWithDefault #(3, 2, 32) LogicModule(
+    .key(LOGICfunc), .out(LOGICResult), .default_out(32'b0), .lut({
+        LOGIC_XOR,  (ALUIn1 ^ ALUIn2),
+        LOGIC_OR ,  (ALUIn1 | ALUIn2),
+        LOGIC_AND,  (ALUIn1 & ALUIn2)
     })
 );
 

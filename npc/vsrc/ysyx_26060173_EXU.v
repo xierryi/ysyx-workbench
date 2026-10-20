@@ -40,10 +40,16 @@ module ysyx_26060173_EXU(
 
     // input of WBU
     output [31:0] dst, // dst -> wdata
-    output [31:0] dnpc
+    output [31:0] dnpc,
+    output [31:0] SR_dst // SR_dst->SR_wdata
 
 );
 
+/* CSR part */
+parameter CSR_CSRRS = 1'b1;
+parameter CSR_CSRRW = 1'b0;
+
+wire csr_type;
 /* ALU Module */
 wire [31:0] ALUIn1;
 wire [31:0] ALUIn2;
@@ -56,12 +62,22 @@ ysyx_26060173_MuxKey #(2, 1, 32) ALUIn1MUX(
     })
 );
 
-ysyx_26060173_MuxKey #(2, 1, 32) ALUIn2MUX(
-    .key(ALUIn2Sel), .out(ALUIn2), .lut({
+wire [31:0] ALUIn2_main;
+
+ysyx_26060173_MuxKey #(2, 1, 32) ALUIn2_mainMUX(
+    .key(ALUIn2Sel), .out(ALUIn2_main), .lut({
         1'b0, imm, 
         1'b1, src2
     })
 );
+
+ysyx_26060173_MuxKey #(2, 1, 32) ALUIn2MUX(
+    .key(1'b1), .out(ALUIn2), .lut({
+        ~csr, ALUIn2_main, 
+        csr & (csr_type == CSR_CSRRS), SR_rdata
+    })
+);
+
 
 ysyx_26060173_ALU ALU(
     .funct3(funct3),
@@ -72,9 +88,19 @@ ysyx_26060173_ALU ALU(
     .ALUIn1Sel(ALUIn1Sel),
     .ALUIn2Sel(ALUIn2Sel),
     .ebreak(ebreak),
+    .csr(csr),
+    .csr_type(csr_type),
     .ALUIn1(ALUIn1),
     .ALUIn2(ALUIn2),
     .ALUResult(ALUResult)
+);
+
+/* csr part */
+ysyx_26060173_MuxKey #(2, 3, 1) CSRMUX(
+    .key(funct3), .out(csr_type), .lut({
+        3'b001,  CSR_CSRRW & csr,
+        3'b010,  CSR_CSRRS & csr
+    })
 );
 
 
@@ -125,19 +151,35 @@ ysyx_26060173_MuxKey #(4, 2, 32) RegInMUX(
 );
 
 ysyx_26060173_MuxKeyWithDefault #(1, 1, 32) dstMUX(
-    .key(1'b1), .out(dst), .default_out(dst_main), .lut({
-        csr     , SR_rdata
+    .key(csr), .out(dst), .default_out(dst_main), .lut({
+        1'b1,  SR_rdata
     })
 );
+
+/* SR_wdata part */
+ysyx_26060173_MuxKeyWithDefault #(2, 1, 32) SR_dstMUX(
+    .key(csr_type), .out(SR_dst), .default_out(32'd0), .lut({
+        CSR_CSRRW,   src1,
+        CSR_CSRRS,   ALUResult
+    })
+);
+
 /* Branch Part */
+wire [31:0] dnpc_main;
 
 assign B_en = ALUResult[0];
 
 ysyx_26060173_MuxKey #(3,2,32) BranchMUX(
-    .key(Branch), .out(dnpc), .lut({
+    .key(Branch), .out(dnpc_main), .lut({
         2'b00    , (pc + 4)     ,        
         2'b01    , (pc + imm)   ,        
         2'b10    , ALUResult
+    })
+);
+
+ysyx_26060173_MuxKeyWithDefault #(1, 1, 32) dnpcMUX(
+    .key(1'b1), .out(dnpc), .default_out(dnpc_main), .lut({
+        (ecall | mret)  ,  SR_rdata      
     })
 );
 

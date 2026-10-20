@@ -8,7 +8,9 @@ module ysyx_26060173_PCRegister #(DATA_WIDTH = 32)(
 );
 
 `ifdef ysyx_26060173_SIMULATION
+`ifdef CONFIG_DIFFTEST
     import "DPI-C" function void difftest_step(input int pc, input int npc); 
+`endif
 `endif
 
     always @(posedge clk or posedge rst) begin
@@ -16,7 +18,9 @@ module ysyx_26060173_PCRegister #(DATA_WIDTH = 32)(
         else if(wen) begin 
             pc <= d_pcreg;
 `ifdef ysyx_26060173_SIMULATION
+`ifdef CONFIG_DIFFTEST
             difftest_step(pc, d_pcreg);
+`endif
 `endif
         end
     end

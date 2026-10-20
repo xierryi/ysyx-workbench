@@ -30,7 +30,8 @@ module ysyx_26060173_IDU(
     output csr,
 
     output [11:0] SR_addr,
-    output SR_wen,
+    output SR_csr_wen,
+    output SR_ecall_wen,
 
     output [2:0] funct3,
     output inst_30,
@@ -39,8 +40,10 @@ module ysyx_26060173_IDU(
     output [4:0] rd,
 
     // for ftrace
+    /* verilator lint_off UNUSEDSIGNAL */
     input [31:0] pc,
     input [31:0] dnpc
+    /* verilator lint_on UNUSEDSIGNAL */ 
 );
 
 wire [6:0] opcode;
@@ -50,6 +53,8 @@ assign funct3 = inst[14:12];
 assign inst_30 = inst[30];
 
 wire EandCSR;
+wire R_wen_main;
+
 ysyx_26060173_Control u0(
     .opcode(opcode),
     .B_en(B_en),
@@ -58,7 +63,7 @@ ysyx_26060173_Control u0(
     .RegIn(RegIn),
     .ALUIn1Sel(ALUIn1Sel),
     .ALUIn2Sel(ALUIn2Sel),
-    .R_wen(R_wen),
+    .R_wen(R_wen_main),
     .M_ren(M_ren),
     .M_wen(M_wen),
     .EandCSR(EandCSR)
@@ -85,6 +90,8 @@ ysyx_26060173_FieldFetch u2(
     .opcode(opcode),
     .ebreak(ebreak),
     .csr(csr),
+    .ecall(ecall),
+    .mret(mret),
     .rs1(rs1),
     .rs2(rs2),
     .rd(rd),
@@ -98,18 +105,23 @@ assign src1 = rdata1;
 assign raddr2 = rs2[3:0];
 assign src2 = rdata2;
 
+assign R_wen = R_wen_main | csr;
+
 /* interfaces for SR */
-assign SR_wen = ecall | csr;
+assign SR_csr_wen = csr;
+assign SR_ecall_wen = ecall;
 
 
 /* TO DO!!! */
 `ifdef ysyx_26060173_SIMULATION
+`ifdef CONFIG_FTRACE
 import "DPI-C" function void ftrace_get_addr(input int inst_addr, input int func_addr, input byte rs1, input byte rd, input int imm);
 always @(*) begin
     if(Branch == 2'b10) begin
        ftrace_get_addr(pc, dnpc, {3'b0, rs1}, {3'b0, rd}, imm);
     end
 end
+`endif
 `endif
 
 endmodule

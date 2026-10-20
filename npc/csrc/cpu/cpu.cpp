@@ -44,6 +44,9 @@ void cpu_init(){
   top->rst_pc = 0;
   top->wen_pc = 1;
   top->eval();
+
+  // top->clk = 1;
+  // top->eval();
 }
 
 void exec_once() {

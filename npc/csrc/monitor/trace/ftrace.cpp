@@ -123,6 +123,7 @@ void load_elf(char * elf_file) {
   fclose(fp);
 }
 
+#ifdef CONFIG_FTRACE
 static bool is_in_range(uint32_t func_addr, int i) {
     return (func_addr >= func_list[i].start_addr && func_addr < func_list[i].end_addr);
 }
@@ -179,3 +180,4 @@ extern "C" void ftrace_get_addr(uint32_t inst_addr, uint32_t func_addr, char rs1
   
   // else printf("???");
 }
+#endif

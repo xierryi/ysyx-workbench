@@ -60,7 +60,8 @@ wire csr;
 // System Register
 wire [11:0] SR_addr;
 wire [31:0] SR_wdata;
-wire SR_wen;
+wire SR_csr_wen;
+wire SR_ecall_wen;
 wire [31:0] SR_rdata;
 
 wire [2:0] funct3;
@@ -74,6 +75,7 @@ wire [31:0] imm;
 wire [4:0] rd;
 wire [31:0] dst;
 wire [31:0] dnpc;
+wire [31:0] SR_dst;
 
 // output of WBU 
 wire [31:0] d_pcreg;
@@ -113,10 +115,13 @@ ysyx_26060173_SystemReg #(
     32
 ) u1(
     .clk(clk),
+    .rst(rst_pc),
+    .pc(pc),
     .addr(SR_addr),
     .rdata(SR_rdata),
     .wdata(SR_wdata),
-    .wen(SR_wen)
+    .csr_wen(SR_csr_wen),
+    .ecall_wen(SR_ecall_wen)
 );
 
 ysyx_26060173_IFU u2(
@@ -152,7 +157,8 @@ ysyx_26060173_IDU u3(
     .mret(mret),
     .csr(csr),
     .SR_addr(SR_addr),
-    .SR_wen(SR_wen),
+    .SR_csr_wen(SR_csr_wen),
+    .SR_ecall_wen(SR_ecall_wen),
     .funct3(funct3),
     .inst_30(inst_30),
     .rd(rd),
@@ -174,6 +180,7 @@ ysyx_26060173_EXU u4(
     .ecall(ecall),
     .mret(mret),
     .csr(csr),
+    .SR_rdata(SR_rdata),
     .funct3(funct3),
     .inst_30(inst_30),
     .src1(src1),
@@ -187,16 +194,19 @@ ysyx_26060173_EXU u4(
     .M_wlen(M_wlen),
     .M_wdata(M_wdata),
     .dst(dst),
-    .dnpc(dnpc)
+    .dnpc(dnpc),
+    .SR_dst(SR_dst)
 );
 
 ysyx_26060173_WBU u5(
     .dnpc(dnpc),
     .rd(rd),
     .dst(dst),
+    .SR_dst(SR_dst),
     .waddr(waddr),
     .wdata(wdata),
-    .d_pcreg(d_pcreg)
+    .d_pcreg(d_pcreg),
+    .SR_wdata(SR_wdata)
 );
 
 ysyx_26060173_LSU u6(
@@ -211,7 +221,7 @@ ysyx_26060173_LSU u6(
 );
 
 /* test module */
-// always (posedge clk) begin
+// always @(posedge clk) begin
     // $display("PC: %x", pc);
     // $display("inst: %x", inst);
     // $display("rdata1: %x", rdata1);
@@ -233,8 +243,12 @@ ysyx_26060173_LSU u6(
     // $display("M_wdata: %x", M_wdata);
     // $display("op_encoded: %d", op_encoded);
     // $display("ebreak: %x", ebreak);
+//     $display("SR_addr: %x", SR_addr);
+//     $display("SR_en: %x", SR_csr_wen);
+//     $display("SR_rdata: %x", SR_rdata);
+//     $display("SR_wdata: %x", SR_wdata);
 
-    // $display("   ");
+//     $display("   ");
 // end
 
 endmodule

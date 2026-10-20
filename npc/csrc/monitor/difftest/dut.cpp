@@ -13,7 +13,7 @@ void (*ref_difftest_regcpy)(void *dut, bool direction) = NULL;
 void (*ref_difftest_exec)(uint64_t n) = NULL;
 void (*ref_difftest_raise_intr)(uint64_t NO) = NULL;
 
-
+#ifdef CONFIG_DIFFTEST
 static bool is_skip_ref = false;
 static int skip_dut_nr_inst = 0;
 
@@ -78,16 +78,29 @@ void init_difftest(char *ref_so_file, long img_size, int port) {
   ref_difftest_regcpy(&cpu, DIFFTEST_TO_REF);
 }
 
+// bool isa_difftest_checkregs(CPU_state *ref_r, int pc) {
+//   for(int i = 0; i < NR_GPR; i ++) {
+//     if(cpu.gpr[i] != ref_r->gpr[i]) {
+//       printf("[DiffTest] errors at 0x%08x\n", pc);
+//       return false;
+//     }
+//   }
+//   return true;
+// }
 bool isa_difftest_checkregs(CPU_state *ref_r, int pc) {
   for(int i = 0; i < NR_GPR; i ++) {
     if(cpu.gpr[i] != ref_r->gpr[i]) {
-      printf("[DiffTest] errors at 0x%08x\n", pc);
+      printf("[DiffTest] errors at 0x%08x\n" ,pc);
+      printf("-------------------------------------------------\n");
+      printf("| reg_idx\t| dut\t\t| ref\t\t|\n");
+      printf("| %d\t\t| 0x%08x\t| 0x%08x\t|\n" , 
+        i, cpu.gpr[i], ref_r->gpr[i]);
+      printf("-------------------------------------------------\n");
       return false;
     }
   }
   return true;
 }
-
 static void checkregs(CPU_state *ref, int pc) {
   if (!isa_difftest_checkregs(ref, pc)) {
     npc_state.state = NPC_ABORT;
@@ -124,3 +137,4 @@ extern "C" void difftest_step(int pc, int npc) {
 
   checkregs(&ref_r, pc);
 }
+#endif
