@@ -17,12 +17,21 @@ module ysyx_26060173_PCRegister #(DATA_WIDTH = 32)(
         if(rst) pc <= d_init;
         else if(wen) begin 
             pc <= d_pcreg;
-`ifdef ysyx_26060173_SIMULATION
-`ifdef CONFIG_DIFFTEST
-            difftest_step(pc, d_pcreg);
-`endif
-`endif
+// `ifdef ysyx_26060173_SIMULATION
+// `ifdef CONFIG_DIFFTEST
+//             difftest_step(pc, d_pcreg);
+// `endif
+// `endif
         end
     end
+
+`ifdef ysyx_26060173_SIMULATION
+import "DPI-C" function void cpu_get_pc(input int pc);
+always @(posedge clk) begin
+    if(wen) begin
+        cpu_get_pc(d_pcreg);
+    end
+end    
+`endif
 
 endmodule 

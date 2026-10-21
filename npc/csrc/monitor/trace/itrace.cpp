@@ -4,6 +4,7 @@
 #include "../utils/disasm.h"
 // #include "/home/xierry/ysyx-workbench/npc/csrc/monitor/utils/disasm.h"
 
+#ifdef CONFIG_ITRACE
 void itrace_output(int inst, int pc) {
     char buf[128];
     char *p = buf;
@@ -22,4 +23,4 @@ void itrace_output(int inst, int pc) {
     memset(buf, 0, sizeof(buf));
     p = buf;
 }
-
+#endif

@@ -23,10 +23,6 @@ always @(*) begin
     inst = wen ? vaddr_ifetch(pc, 4) : 0; 
 end    
 
-import "DPI-C" function void cpu_get_pc(input int pc);
-always @(*) begin
-    cpu_get_pc(pc);
-end    
 `endif
 
 endmodule

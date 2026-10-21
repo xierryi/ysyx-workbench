@@ -88,6 +88,11 @@ void init_difftest(char *ref_so_file, long img_size, int port) {
 //   return true;
 // }
 bool isa_difftest_checkregs(CPU_state *ref_r, int pc) {
+  // printf("ref_r: 0x%08x\n", ref_r->gpr[2]);
+  // printf("ref_r_pc: 0x%08x\n", ref_r->pc);
+  // printf("cpu: 0x%08x\n", cpu.gpr[2]);
+  // printf("pc: 0x%08x\n", pc);
+  // printf("cpu_pc: 0x%08x\n", cpu.pc);
   for(int i = 0; i < NR_GPR; i ++) {
     if(cpu.gpr[i] != ref_r->gpr[i]) {
       printf("[DiffTest] errors at 0x%08x\n" ,pc);
@@ -99,6 +104,7 @@ bool isa_difftest_checkregs(CPU_state *ref_r, int pc) {
       return false;
     }
   }
+  
   return true;
 }
 static void checkregs(CPU_state *ref, int pc) {

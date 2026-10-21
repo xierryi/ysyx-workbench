@@ -42,8 +42,9 @@ ysyx_26060173_SREncode #(ADDR_WIDTH) u0 (
   end
   assign rdata = rf[addr_enc]; // rdata1 = R[raddr1]
 
-  /* counter */
+  /* counter */ 
   always @(posedge clk or posedge rst) begin
+  // always @(posedge clk or posedge rst) begin
     if(rst) begin rf[3'd4] <= 0; rf[3'd5] <= 0; end 
     else
     begin
@@ -53,6 +54,13 @@ ysyx_26060173_SREncode #(ADDR_WIDTH) u0 (
 
   // always @(posedge clk) begin
   //   $display("cycle num: %x %x", rf[3'd5], rf[3'd4]);
+  // end
+  // always @(posedge clk) begin
+  //   $display("mstatus: %x ", rf[3'd0]);
+  //   $display("mstatus: %x ", rf[3'd1]);
+  //   $display("mstatus: %x ", rf[3'd2]);
+  //   $display("mstatus: %x ", rf[3'd3]);
+  //   $display("mstatus: %x ", rf[3'd4]);
   // end
 
 /* verilator lint_on MULTIDRIVEN */

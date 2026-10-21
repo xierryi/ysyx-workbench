@@ -36,7 +36,9 @@ int main(int argc, char** argv) {
   sdb_set_batch_mode(); 
 
   /* init the disasm for itrace */
+  #ifdef CONFIG_ITRACE
   init_disasm(); 
+  #endif
 
   /* state initialize */
   cpu_init();

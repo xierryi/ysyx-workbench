@@ -31,6 +31,7 @@ extern "C" void npc_trap(int pc, int halt_ret) {
 }
 
 extern "C" void cpu_get_pc(int pc) {
+  // printf("pcpc:0x%08x\n",pc);
   cpu.pc = pc;
 }
 
@@ -42,6 +43,7 @@ void cpu_init(){
   top->rst_pc = 1;
   top->eval();
   top->rst_pc = 0;
+  top->eval();
   top->wen_pc = 1;
   top->eval();
 

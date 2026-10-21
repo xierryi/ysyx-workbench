@@ -135,12 +135,14 @@ extern "C" int vaddr_read(int raddr, int len) {
 
 extern "C" int vaddr_ifetch(int raddr, int len) {
   int inst = paddr_read(raddr, len);
+  #ifdef CONFIG_ITRACE
   static int call_count_2 = 0; // call_count_2 is strange!! TO FIX ME
   if(g_print_step) {
     if(call_count_2 > 1) call_count_2 = 0; 
     else call_count_2 ++;
     if(call_count_2 == 1)itrace_output(inst, raddr);
   }
+  #endif
   return inst; // avoid any shift in RTL
 }
 // store inst api
