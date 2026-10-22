@@ -30,7 +30,7 @@ module ysyx_26060173_RegisterFile #(ADDR_WIDTH = 1, DATA_WIDTH = 1) (
 `ifdef ysyx_26060173_SIMULATION
 import "DPI-C" function void reg_get_val(input int idx, input int val);
 always @(*) begin
-  for(int i = 0; i < 16; i ++) reg_get_val(i, rf[i]); // call
+  for(int i = 0; i < 16; i ++) reg_get_val(i, rf[i]); 
 end
 `endif
 

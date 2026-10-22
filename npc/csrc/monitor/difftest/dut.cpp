@@ -115,7 +115,19 @@ static void checkregs(CPU_state *ref, int pc) {
   }
 }
 
-extern "C" void difftest_step(int pc, int npc) {
+extern "C" void difftest_step(int pc, int npc, char clk, char wen) { 
+  static bool is_valid = false; // status val
+  static int call_count = 0;
+  
+  call_count ++;  // call once, inc once
+
+  // status transfer
+  switch (call_count & clk & wen) {
+    case 6: is_valid = true; call_count = 0; break;
+    default: is_valid = false; break;
+  }
+
+  if(is_valid) {
   CPU_state ref_r;
 
   if (skip_dut_nr_inst > 0) {
@@ -142,5 +154,6 @@ extern "C" void difftest_step(int pc, int npc) {
   ref_difftest_regcpy(&ref_r, DIFFTEST_TO_DUT);
 
   checkregs(&ref_r, pc);
+}
 }
 #endif

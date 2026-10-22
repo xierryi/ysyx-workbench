@@ -21,7 +21,9 @@ int main(int argc, char** argv) {
   long img_size = load_img(argc, argv);
 
   /* load $(img).elf for ftrace */
+  #ifdef CONFIG_FTRACE
   load_elf(argv[2]);
+  #endif
 
   /* load shared object for difftest */
   char *diff_so_file = argv[3];

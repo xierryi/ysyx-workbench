@@ -1,9 +1,9 @@
 #ifndef __MEM_H__
 #define __MEM_H__
 
-#define CONFIG_MBASE 0x80000000
+// #define CONFIG_MBASE 0x80000000
 // #define CONFIG_MBASE 0
-#define RESET_VECTOR 0x80000000
+#define RESET_VECTOR CONFIG_MBASE
 
 #define SERIAL_ADDR 0x10000000U
 #define RTC_ADDR    0x10000048U

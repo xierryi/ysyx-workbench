@@ -11,7 +11,7 @@
 extern bool g_print_step;
 
 char *img_file = NULL;
-uint8_t pmem[65535000];
+static uint8_t pmem[CONFIG_MSIZE];
 // uint8_t pmem[6555300] = {
 //     // 0x04402083: lw x1, 0x44(x0)
 //     0x83, 0x20, 0x40, 0x04,

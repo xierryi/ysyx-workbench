@@ -2,6 +2,15 @@
 #include <riscv/riscv.h>
 #include <klib.h>
 
+#ifndef __riscv_e
+#define NR_REGS 32
+#else
+#define NR_REGS 16
+#endif
+
+#define XLEN  8
+#define CONTEXT_SIZE  ((NR_REGS + 3) * XLEN)
+
 static Context* (*user_handler)(Event, Context*) = NULL;
 
 Context* __am_irq_handle(Context *c) {
@@ -35,7 +44,24 @@ bool cte_init(Context*(*handler)(Event, Context*)) {
 }
 
 Context *kcontext(Area kstack, void (*entry)(void *), void *arg) {
-  return NULL;
+  Context *cp = NULL;
+
+  // initialize stack structure
+  int stack_size = kstack.end - kstack.start;
+  memset(kstack.start, 0, stack_size);
+
+  // put context into bottom of the stack(aka top in addr)
+  cp = (Context *)((uintptr_t)kstack.end - CONTEXT_SIZE);
+
+  // set arg to a0
+  cp->gpr[10] = (uintptr_t)arg;
+
+  // set mstatus to meet requirement of difftest
+  cp->mstatus = 0x1800;
+
+  // set return pc for kernel thread
+  cp->mepc = (uintptr_t)entry;
+  return cp;
 }
 
 void yield() {
