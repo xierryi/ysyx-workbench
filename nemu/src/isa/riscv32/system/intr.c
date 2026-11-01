@@ -17,9 +17,6 @@
 #include "../local-include/csr.h"
 
 word_t isa_raise_intr(word_t NO, vaddr_t epc) {
-  /* TODO: Trigger an interrupt/exception with ``NO''.
-   * Then return the address of the interrupt/exception vector.
-   */
   word_t trap_addr = 0;
   csr[CSR_MEPC] = epc;     // SR[mepc] <- PC
   csr[CSR_MCAUSE] = NO;         // SR[mcause] <- 一个描述失败原因的号码

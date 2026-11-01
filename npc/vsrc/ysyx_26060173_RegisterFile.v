@@ -20,7 +20,7 @@ module ysyx_26060173_RegisterFile #(ADDR_WIDTH = 1, DATA_WIDTH = 1) (
   assign rf[0] = 0;
   `else
   always @* begin
-    rf[0] = 0; // R[0] = 0
+    rf[0] = 0; // R[0] = 0 // assert
   end
   `endif
 
