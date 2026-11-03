@@ -40,13 +40,11 @@ wire [31:0] rdata1;
 wire [31:0] rdata2;
 
 // LSU interfaces
-wire [7:0] M_waddr;
-// wire [31:0] M_waddr;
+wire [31:0] M_waddr;
 wire [1:0] M_wlen;
 wire [31:0] M_wdata;
 wire [31:0] M_rdata;
-// wire [31:0] M_raddr; 
-wire [7:0] M_raddr; 
+wire [31:0] M_raddr; 
 wire [1:0] M_rlen;
 
 // Control Signal
@@ -141,12 +139,6 @@ ysyx_26060173_IFU u2(
     .d_pcreg(d_pcreg), 
     .pc(pc),
     .inst(inst)
-
-    // only for reg as M
-    ,
-    // .inst_waddr(inst_waddr),
-    // .inst_wen(inst_wen),
-    // .inst_wdata(inst_wdata)
 );
 
 ysyx_26060173_IDU u3(
@@ -225,7 +217,6 @@ ysyx_26060173_WBU u5(
 );
 
 ysyx_26060173_LSU u6(
-    .clk(clk),
     .ren(M_ren),
     .wen(M_wen),
     .waddr(M_waddr),

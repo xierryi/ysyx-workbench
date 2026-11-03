@@ -11,11 +11,6 @@ module ysyx_26060173_IFU(
     // input ready,    // IFU <- IDU
     // output valid    // IFU -> IDU
 
-    // only for reg as M
-    // ,
-    // input inst_wen, 
-    // input [7:0] inst_waddr,
-    // input [31:0] inst_wdata
 );
 
 ysyx_26060173_PCRegister #(32) u0(
@@ -44,19 +39,6 @@ ysyx_26060173_PCRegister #(32) u0(
 //         s_wait_ready, ready ? s_idle : s_wait_ready 
 //     }) 
 // );
-
-// wire [31:0] inst_;
-
-// ysyx_26060173_RegisterFile_forM #(8, 32) u2(
-//     .clk(clk),
-//     .wen(1'b1),
-//     .waddr(8'b0),
-//     .wdata(32'b0),
-//     .raddr(pc[7:0]),
-//     .rdata(inst_)
-// );
-
-// assign inst = wen ? inst_ : 0;
 
 `ifdef ysyx_26060173_SIMULATION
 import "DPI-C" function int vaddr_ifetch(input int raddr, input int len);
