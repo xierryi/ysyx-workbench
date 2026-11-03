@@ -17,12 +17,14 @@ module ysyx_26060173_PCRegister #(DATA_WIDTH = 32)(
     end
 
 `ifdef ysyx_26060173_SIMULATION
+`ifdef CONFIG_TRACE
 import "DPI-C" function void cpu_get_pc(input int pc);
 always @(posedge clk) begin
     if(wen) begin
         cpu_get_pc(d_pcreg);
     end
 end    
+`endif
 `endif
 
 `ifdef ysyx_26060173_SIMULATION

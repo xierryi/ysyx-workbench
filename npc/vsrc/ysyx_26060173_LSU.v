@@ -1,10 +1,13 @@
 module ysyx_26060173_LSU(
+    input clk,
     input ren,
     input wen,
-    input [31:0] waddr,
+    // input [31:0] waddr,
+    input [7:0] waddr,
     input [1:0] wlen,
     input [31:0] wdata,
-    input [31:0] raddr,
+    // input [31:0] raddr,
+    input [7:0] raddr,
     input [1:0] rlen,
     output reg [31:0] rdata
 );
@@ -31,6 +34,20 @@ ysyx_26060173_MuxKey #(3, 2, 32) u1(
         LEN_4, 32'd4
     })
 );
+
+wire [31:0] rdata_;
+
+(* keep *) ysyx_26060173_RegisterFile_forM #(8, 32) u2(
+    .clk(clk),
+    .raddr(raddr),
+    .rdata(rdata_),
+    .waddr(waddr),
+    .wen(wen),
+    .wdata(wdata)
+);
+
+assign rdata = ren ? rdata_ : 0;
+
 /* verilator lint_on UNUSEDSIGNAL */
 `ifdef ysyx_26060173_SIMULATION
 import "DPI-C" function int vaddr_read(input int raddr, input int len);

@@ -9,15 +9,22 @@ module top(
     // ---- 指令存储器接口（综合时对外）----
     output [31:0] imem_addr,
     input  [31:0] imem_rdata,
+    // only for reg as M
+    // input inst_wen, 
+    // input [7:0] inst_waddr,
+    // input [31:0] inst_wdata,
+
     // ---- 数据存储器接口（综合时对外）----
     output        dmem_ren,
     output        dmem_wen,
-    output [31:0] dmem_raddr,
+    // output [31:0] dmem_raddr,
+    output [7:0] dmem_raddr,
     output [1:0]  dmem_rlen,
-    output [31:0] dmem_waddr,
+    // output [31:0] dmem_waddr,
+    output [7:0] dmem_waddr,
     output [1:0]  dmem_wlen,
     output [31:0] dmem_wdata,
-    input  [31:0] dmem_rdata
+    // input  [31:0] dmem_rdata
     `endif
 );
 // output of IFU module
@@ -33,11 +40,13 @@ wire [31:0] rdata1;
 wire [31:0] rdata2;
 
 // LSU interfaces
-wire [31:0] M_waddr;
+wire [7:0] M_waddr;
+// wire [31:0] M_waddr;
 wire [1:0] M_wlen;
 wire [31:0] M_wdata;
 wire [31:0] M_rdata;
-wire [31:0] M_raddr; 
+// wire [31:0] M_raddr; 
+wire [7:0] M_raddr; 
 wire [1:0] M_rlen;
 
 // Control Signal
@@ -92,7 +101,7 @@ assign dmem_rlen  = M_rlen;
 assign dmem_waddr = M_waddr;
 assign dmem_wlen  = M_wlen;
 assign dmem_wdata = M_wdata;
-assign M_rdata    = dmem_rdata;
+// assign M_rdata    = dmem_rdata;
 
 `endif
 
@@ -132,6 +141,12 @@ ysyx_26060173_IFU u2(
     .d_pcreg(d_pcreg), 
     .pc(pc),
     .inst(inst)
+
+    // only for reg as M
+    ,
+    // .inst_waddr(inst_waddr),
+    // .inst_wen(inst_wen),
+    // .inst_wdata(inst_wdata)
 );
 
 ysyx_26060173_IDU u3(
@@ -210,6 +225,7 @@ ysyx_26060173_WBU u5(
 );
 
 ysyx_26060173_LSU u6(
+    .clk(clk),
     .ren(M_ren),
     .wen(M_wen),
     .waddr(M_waddr),

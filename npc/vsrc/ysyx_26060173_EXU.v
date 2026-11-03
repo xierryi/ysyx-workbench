@@ -31,9 +31,11 @@ module ysyx_26060173_EXU(
 
     // Memory interfaces
     input [31:0] M_rdata,
-    output [31:0] M_raddr,
+    // output [31:0] M_raddr,
+    output [7:0] M_raddr,
     output [1:0] M_rlen,
-    output [31:0] M_waddr,
+    // output [31:0] M_waddr,
+    output [7:0] M_waddr,
     output [1:0] M_wlen,
     output [31:0] M_wdata,
 
@@ -109,8 +111,10 @@ parameter M_LEN_1 = 2'b00;
 parameter M_LEN_2 = 2'b01;
 parameter M_LEN_4 = 2'b11;
 
-assign M_raddr = ALUResult;
-assign M_waddr = ALUResult;
+// assign M_raddr = ALUResult;
+// assign M_waddr = ALUResult;
+assign M_raddr = ALUResult[7:0];
+assign M_waddr = ALUResult[7:0];
 
 ysyx_26060173_MuxKeyWithDefault #(3,2, 2) M_rlenMUX(
     .key(funct3[1:0]), .out(M_rlen), .default_out(2'b0), .lut({

@@ -12,3 +12,8 @@
 !README.md
 build/
 obj_dir/
+!result/top-500MHz/synth_stat.txt
+!result/top-500MHz/top.rpt
+
+result/**/*.v
+result/*.v

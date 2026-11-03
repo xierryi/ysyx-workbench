@@ -2,6 +2,10 @@
 #include <klib-macros.h>
 #include <klib.h>
 
+#define BOLD  "\033[1m"
+#define BLUE  "\033[34m"
+#define RESET "\033[0m"
+
 extern char _heap_start;
 int main(const char *args);
 
@@ -26,6 +30,7 @@ void halt(int code) {
 }
 
 void _trm_init() {
+  // display ID
   union {
     uint32_t vendorid;
     uint8_t id[4];
@@ -33,10 +38,22 @@ void _trm_init() {
   uint32_t archid;
   asm volatile ("csrr %0, mvendorid" : "=r"(u.vendorid));
   asm volatile ("csrr %0, marchid" : "=r"(archid));
-  printf("My ID is:");
+  printf(BOLD BLUE "My ID is:");
   printf("%c%c%c%c_",u.id[3], u.id[2], u.id[1], u.id[0]);
-  printf("%d\n",archid);
+  printf("%d" RESET "\n",archid);
 
   int ret = main(mainargs);
+
+  // display cycle num
+  union {
+    uint32_t cycle_num[2];
+    uint64_t cycle_num_wrap;
+  } n;
+
+  asm volatile ("csrr %0, mcycle" : "=r"(n.cycle_num[0]));
+  asm volatile ("csrr %0, mcycle" : "=r"(n.cycle_num[1]));
+
+  printf(BOLD BLUE "Cycle num is:");
+  printf("%d(0x%x)" RESET "\n",n.cycle_num_wrap, n.cycle_num_wrap);
   halt(ret);
 }
