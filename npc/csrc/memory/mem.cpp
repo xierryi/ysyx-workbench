@@ -136,12 +136,7 @@ extern "C" int vaddr_read(int raddr, int len) {
 extern "C" int vaddr_ifetch(int raddr, int len) {
   int inst = paddr_read(raddr, len);
   #ifdef CONFIG_ITRACE
-  static int call_count_2 = 0; // call_count_2 is strange!! TO FIX ME
-  if(g_print_step) {
-    if(call_count_2 > 1) call_count_2 = 0; 
-    else call_count_2 ++;
-    if(call_count_2 == 1)itrace_output(inst, raddr);
-  }
+  itrace_output(inst, raddr);
   #endif
   return inst; // avoid any shift in RTL
 }
@@ -153,13 +148,8 @@ extern "C" void vaddr_write(int waddr, int wdata, int len) {
 
   // printf("C:wdata:%x\n",wdata);
   /* SERIAL PART */
-  static int call_count_2 = 0; // call_count_2 is strange!! TO FIX ME
   if(waddr == SERIAL_ADDR) 
   { 
-    if(call_count_2 > 1) call_count_2 = 0; 
-    else call_count_2 ++;
-    // printf("call_count:%d\n",call_count);
-    if(!call_count_2)
     putchar(wdata);   
     return;
   }
@@ -180,8 +170,6 @@ extern "C" void vaddr_write(int waddr, int wdata, int len) {
   // pmem[(waddr - CONFIG_MBASE)] = (pmem[(waddr - CONFIG_MBASE)] & ~wmask_4byte) | ((wdata << one_pos * 8) & wmask_4byte);
   host_write(guest_to_host(waddr), len, wdata);
   if(g_print_step) {
-    if(call_count_2 > 1) call_count_2 = 0; 
-    else call_count_2 ++;
-    if(call_count_2 == 0) mtrace_output(waddr, wdata, len, WRITE_MODE);
+    mtrace_output(waddr, wdata, len, WRITE_MODE);
   }
 }

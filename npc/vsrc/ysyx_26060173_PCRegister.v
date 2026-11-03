@@ -21,7 +21,7 @@ module ysyx_26060173_PCRegister #(DATA_WIDTH = 32)(
 import "DPI-C" function void cpu_get_pc(input int pc);
 always @(posedge clk) begin
     if(wen) begin
-        cpu_get_pc(d_pcreg);
+        cpu_get_pc(pc);
     end
 end    
 `endif

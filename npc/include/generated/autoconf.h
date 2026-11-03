@@ -4,7 +4,15 @@
  * NPC Configuration Menu
  *
  */
+#define CONFIG_FTRACE_COND "true"
+#define CONFIG_MTRACE_BASE 0x80000000
 #define CONFIG_MSIZE 0x8000000
+#define CONFIG_ITRACE 1
+#define CONFIG_MTRACE_SIZE 0x1000
+#define CONFIG_MTRACE_COND "true"
 #define CONFIG_MBASE 0x80000000
 #define CONFIG_WAVEFORM 1
+#define CONFIG_FTRACE 1
+#define CONFIG_MTRACE 1
+#define CONFIG_ITRACE_COND "true"
 #define CONFIG_TRACE 1

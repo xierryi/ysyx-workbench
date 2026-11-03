@@ -1,7 +1,7 @@
 module top(
     input clk,
     input rst_pc,
-    input wen_pc,
+    // input wen_pc,
     input [31:0] d_init_pc
 
     `ifdef ysyx_26060173_SYNTHESIS
@@ -30,6 +30,7 @@ module top(
 // output of IFU module
 wire [31:0] inst;
 wire [31:0] pc;
+wire ifu_valid;
 
 // regfiles interfaces
 wire [3:0] waddr; 
@@ -110,7 +111,7 @@ ysyx_26060173_RegisterFile #(
     .clk(clk),
     .wdata(wdata),
     .waddr(waddr),
-    .wen(R_wen),
+    .wen(R_wen & ifu_valid),
     .raddr1(raddr1),
     .raddr2(raddr2),
     .rdata1(rdata1),
@@ -127,18 +128,19 @@ ysyx_26060173_SystemReg #(
     .addr(SR_addr),
     .rdata(SR_rdata),
     .wdata(SR_wdata),
-    .csr_wen(SR_csr_wen),
-    .ecall_wen(SR_ecall_wen)
+    .csr_wen(SR_csr_wen & ifu_valid),
+    .ecall_wen(SR_ecall_wen & ifu_valid)
 );
 
 ysyx_26060173_IFU u2(
     .clk(clk), 
     .rst(rst_pc),
-    .wen(wen_pc), 
+    // .pc_wen_out(wen_pc), 
     .d_init(d_init_pc),
     .d_pcreg(d_pcreg), 
-    .pc(pc),
-    .inst(inst)
+    .ifu_raddr(pc),
+    .ifu_rdata(inst),
+    .ifu_valid(ifu_valid)
 );
 
 ysyx_26060173_IDU u3(
@@ -217,8 +219,9 @@ ysyx_26060173_WBU u5(
 );
 
 ysyx_26060173_LSU u6(
-    .ren(M_ren),
-    .wen(M_wen),
+    .clk(clk),
+    .ren(M_ren & ifu_valid),
+    .wen(M_wen & ifu_valid),
     .waddr(M_waddr),
     .wlen(M_wlen),
     .wdata(M_wdata),

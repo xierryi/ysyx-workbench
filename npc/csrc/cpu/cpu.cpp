@@ -58,20 +58,15 @@ void step() {
 
 void cpu_init(){
   top->clk = 0;
-  step();
   top->rst_pc = 0;
-  step();
   top->d_init_pc = CONFIG_MBASE;
   step();
+
   top->rst_pc = 1;
   step();
+
   top->rst_pc = 0;
   step();
-  top->wen_pc = 1;
-  step();
-
-  // top->clk = 1;
-  // step();
 }
 
 void exec_once() {

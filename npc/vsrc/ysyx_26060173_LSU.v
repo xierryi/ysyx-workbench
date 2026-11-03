@@ -1,4 +1,5 @@
 module ysyx_26060173_LSU(
+    input clk,
     input ren,
     input wen,
     input [31:0] waddr,
@@ -38,16 +39,19 @@ import "DPI-C" function int vaddr_read(input int raddr, input int len);
 import "DPI-C" function void vaddr_write(
   input int waddr, input int wdata, input int len);
 
+always @(posedge clk) begin
+    if(wen) begin
+        vaddr_write(waddr, wdata, wlen_num);
+    end
+end
+
 always @(*) begin
     if(ren) begin
         rdata = vaddr_read(raddr, rlen_num);
     end
     else begin
         rdata = 0;
-    end
-    if(wen) begin
-        vaddr_write(waddr, wdata, wlen_num);
-    end
+    end   
 end
 `endif
 
