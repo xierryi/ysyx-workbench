@@ -1,0 +1,65 @@
+mainmenu "NPC Configuration Menu"
+
+menu "Testing and Debugging"
+
+
+config TRACE
+  bool "Enable tracer"
+  default y
+
+config ITRACE
+  depends on TRACE 
+  bool "Enable instruction tracer"
+  default y
+
+config ITRACE_COND
+  depends on ITRACE
+  string "Only trace instructions when the condition is true"
+  default "true"
+
+config MTRACE
+  depends on TRACE
+  bool "Enable memory tracer"
+  default y
+
+config MTRACE_COND
+  depends on MTRACE
+  string "Only trace memories when the condition is true"
+  default "true"
+
+config MTRACE_BASE
+  depends on MTRACE
+  hex "mtrace monitoring base address"
+  default 0x80000000
+
+config MTRACE_SIZE
+  depends on MTRACE
+  hex "mtrace monitoring space size"
+  default 0x1000
+
+config FTRACE
+  depends on TRACE 
+  bool "Enable function tracer"
+  default y
+
+config FTRACE_COND
+  depends on FTRACE
+  string "Only trace functions when the condition is true"
+  default "true"
+
+config DIFFTEST
+  depends on TRACE
+  bool "Enable differential testing"
+  default n
+  help
+    Enable differential testing with a reference design.
+    Note that this will significantly reduce the performance of NPC.
+
+config WAVEFORM
+  depends on TRACE 
+  bool "Enable waveform"
+  default y
+
+endmenu
+
+source "csrc/memory/Kconfig"

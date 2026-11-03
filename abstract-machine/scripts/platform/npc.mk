@@ -28,4 +28,7 @@ image: image-dep
 run: insert-arg
 	$(MAKE) -C $(NPC_HOME) sim IMG=$(IMAGE)
 
+run_tracing: insert-arg
+	$(MAKE) -C $(NPC_HOME) sim_tracing IMG=$(IMAGE)
+
 .PHONY: insert-arg

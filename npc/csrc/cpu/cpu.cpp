@@ -1,5 +1,6 @@
 #include <stdio.h>
 #include "verilated.h"
+#include "verilated_fst_c.h"
 #include "Vtop.h"
 #include "svdpi.h"
 #include "Vtop__Dpi.h"
@@ -15,12 +16,24 @@
 
 VerilatedContext* contextp = new VerilatedContext;
 Vtop* top = new Vtop{contextp};
+// static Vtop* top; 
+
+#ifdef CONFIG_WAVEFORM
+  VerilatedFstC* tfp = new VerilatedFstC;
+#endif 
 
 NPCState npc_state = {.state = NPC_STOP};
 CPU_state cpu;
 
 void system_init(int argc, char **argv) {
-    contextp->commandArgs(argc, argv);
+  contextp->commandArgs(argc, argv);
+
+#ifdef CONFIG_WAVEFORM
+	contextp->traceEverOn(true);
+	top->trace(tfp, 0);
+	Verilated::mkdir("tracing_logs");
+	tfp->open("tracing_logs/dump.fst");
+#endif
 }
 
 extern "C" void npc_trap(int pc, int halt_ret) { 
@@ -35,27 +48,37 @@ extern "C" void cpu_get_pc(int pc) {
   cpu.pc = pc;
 }
 
+void step() {
+  top->eval();
+  #ifdef CONFIG_WAVEFORM
+  contextp->timeInc(1);
+	tfp->dump(contextp->time());
+  #endif
+}
+
 void cpu_init(){
   top->clk = 0;
+  step();
   top->rst_pc = 0;
+  step();
   top->d_init_pc = CONFIG_MBASE;
-  top->eval();
+  step();
   top->rst_pc = 1;
-  top->eval();
+  step();
   top->rst_pc = 0;
-  top->eval();
+  step();
   top->wen_pc = 1;
-  top->eval();
+  step();
 
   // top->clk = 1;
-  // top->eval();
+  // step();
 }
 
 void exec_once() {
-  top->clk = ~top->clk;
-  top->eval();
-  top->clk = ~top->clk;
-  top->eval();
+  top->clk = 1;
+  step();
+  top->clk = 0;
+  step();
 }
 
 bool g_print_step = false;
@@ -96,6 +119,10 @@ void cpu_exec(int n) {
 }
 
 void system_free() {
+#ifdef CONFIG_WAVEFORM
+	tfp->close();
+  delete tfp;
+#endif
   delete top;
   delete contextp;
 }

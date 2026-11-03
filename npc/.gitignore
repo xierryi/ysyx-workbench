@@ -10,6 +10,7 @@
 !*.cpp
 !.gitignore
 !README.md
+!Kconfig
 build/
 obj_dir/
 !result/top-500MHz/synth_stat.txt
