@@ -117,7 +117,7 @@ assign SR_ecall_wen = ecall;
 `ifdef CONFIG_FTRACE
 import "DPI-C" function void ftrace_get_addr(input int inst_addr, input int func_addr, input byte rs1, input byte rd, input int imm);
 always @(*) begin
-    if(Branch == 2'b10) begin
+    if(Branch == 2'b10 && ifu_valid) begin
        ftrace_get_addr(pc, dnpc, {3'b0, rs1}, {3'b0, rd}, imm);
     end
 end

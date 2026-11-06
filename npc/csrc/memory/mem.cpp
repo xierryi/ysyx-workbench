@@ -136,6 +136,7 @@ extern "C" int vaddr_read(int raddr, int len) {
 extern "C" int vaddr_ifetch(int raddr, int len) {
   int inst = paddr_read(raddr, len);
   #ifdef CONFIG_ITRACE
+  if(g_print_step)
   itrace_output(inst, raddr);
   #endif
   return inst; // avoid any shift in RTL

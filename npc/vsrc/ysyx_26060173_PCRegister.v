@@ -23,6 +23,7 @@ always @(posedge clk) begin
     if(wen) begin
         cpu_get_pc(pc);
     end
+    // $display("wen:%x",wen);
 end    
 `endif
 `endif

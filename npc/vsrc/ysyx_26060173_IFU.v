@@ -7,7 +7,11 @@ module ysyx_26060173_IFU(
     // simple bus
     output reg [31:0] ifu_raddr,
     output [31:0] ifu_rdata,
-    output ifu_valid
+    output ifu_valid,
+
+    input ifu_isload,
+    input lsu2ifu_ready,
+    output ifu2lsu_rvalid
 
     // async bus // implement later
     // input ready,    // IFU <- IDU
@@ -15,6 +19,7 @@ module ysyx_26060173_IFU(
 
 );
 wire [31:0] pc;
+// wire pc_wen;
 
 ysyx_26060173_PCRegister #(32) u0(
     .clk(clk),
@@ -26,26 +31,38 @@ ysyx_26060173_PCRegister #(32) u0(
 );
 
 // // bus status transfer
-parameter s_idle        = 1'b0;
-parameter s_wait        = 1'b1;
+parameter s_idle        = 2'b00;
+parameter s_wait        = 2'b01;
+parameter s_wait_lsu    = 2'b10;
 
-reg cur_state, next_state;
+reg [1:0] cur_state, next_state;
 
 always @(posedge clk) begin
     cur_state <= next_state;
+    // $display("cur_state:%x",cur_state);
 end
 
-ysyx_26060173_MuxKey #(2,1, 1) ST_next_state(
+ysyx_26060173_MuxKey #(3,2, 2) ST_next_state(
     .key(cur_state), .out(next_state),.lut({
         s_idle      , s_wait,
-        s_wait      , s_idle
+        s_wait      , ifu_isload ? s_wait_lsu : s_idle,
+        s_wait_lsu  , lsu2ifu_ready ? s_idle : s_wait_lsu
     }) 
 );
 
-ysyx_26060173_MuxKey #(2,1, 1) validMux(
+ysyx_26060173_MuxKey #(3,2, 1) validMux(
     .key(cur_state), .out(ifu_valid),.lut({
         s_idle      , 1'b0,
-        s_wait      , 1'b1
+        s_wait      , ifu_isload ? 1'b0 : 1'b1,
+        s_wait_lsu  , 1'b1
+    }) 
+);
+
+ysyx_26060173_MuxKey #(3,2, 1) ifu2lsu_rvalidMux(
+    .key(cur_state), .out(ifu2lsu_rvalid),.lut({
+        s_idle      , 1'b0,
+        s_wait      , 1'b1,
+        s_wait_lsu  , 1'b0
     }) 
 );
 

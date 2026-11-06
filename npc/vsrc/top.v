@@ -31,6 +31,8 @@ module top(
 wire [31:0] inst;
 wire [31:0] pc;
 wire ifu_valid;
+wire lsu2ifu_ready;
+wire ifu2lsu_rvalid;
 
 // regfiles interfaces
 wire [3:0] waddr; 
@@ -140,7 +142,10 @@ ysyx_26060173_IFU u2(
     .d_pcreg(d_pcreg), 
     .ifu_raddr(pc),
     .ifu_rdata(inst),
-    .ifu_valid(ifu_valid)
+    .ifu_valid(ifu_valid),
+    .ifu_isload(M_ren),
+    .lsu2ifu_ready(lsu2ifu_ready),
+    .ifu2lsu_rvalid(ifu2lsu_rvalid)
 );
 
 ysyx_26060173_IDU u3(
@@ -220,19 +225,22 @@ ysyx_26060173_WBU u5(
 
 ysyx_26060173_LSU u6(
     .clk(clk),
-    .ren(M_ren & ifu_valid),
-    .wen(M_wen & ifu_valid),
-    .waddr(M_waddr),
-    .wlen(M_wlen),
-    .wdata(M_wdata),
-    .raddr(M_raddr),
-    .rlen(M_rlen),
-    .rdata(M_rdata)
+    .lsu_ren(M_ren),
+    .lsu_wen(M_wen & ifu_valid),
+    .lsu_waddr(M_waddr),
+    .lsu_wlen(M_wlen),
+    .lsu_wdata(M_wdata),
+    .lsu_raddr(M_raddr),
+    .lsu_rlen(M_rlen),
+    // .ifu_valid(ifu_valid),
+    .ifu2lsu_rvalid(ifu2lsu_rvalid),
+    .lsu2ifu_ready(lsu2ifu_ready),
+    .lsu_rdata(M_rdata)
 );
 
 /* test module */
 // always @(posedge clk) begin
-    // $display("PC: %x", pc);
+//     $display("PC: %x", pc);
     // $display("inst: %x", inst);
     // $display("rdata1: %x", rdata1);
     // $display("rdata2: %x", rdata2);
@@ -246,6 +254,11 @@ ysyx_26060173_LSU u6(
     // $display("M_rdata: %x", M_rdata);
     // $display("M_raddr: %x", M_raddr);
     // $display("rlen: %x", M_rlen);
+    // $display("M_ren: %x", M_ren);
+    // $display("ifu_valid: %x", ifu_valid);
+    // $display("ifu2lsu_rvalid: %x", ifu2lsu_rvalid);
+    // $display("lsu2ifu_ready: %x", lsu2ifu_ready);
+    // $display("R_wen: %x", R_wen);
 
     // $display("dnpc: %x", dnpc);
     // $display("M_waddr: %x", M_waddr);

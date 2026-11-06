@@ -6,6 +6,12 @@
 #include "../../cpu/cpu.h"
 #include "../../reg/reg.h"
 
+#define BOLD  "\033[1m"
+#define RED   "\033[31m"
+#define GREEN "\033[32m"
+#define BLUE  "\033[34m"
+#define RESET "\033[0m"
+
 enum { DIFFTEST_TO_DUT, DIFFTEST_TO_REF };
 
 void (*ref_difftest_memcpy)(uint32_t addr, void *buf, size_t n, bool direction) = NULL;
@@ -68,7 +74,7 @@ void init_difftest(char *ref_so_file, long img_size, int port) {
   void (*ref_difftest_init)(int) = (void (*)(int))dlsym(handle, "difftest_init");
   assert(ref_difftest_init);
 
-  printf("Differential testing: %s\n", "ON");
+  printf( BOLD BLUE "Differential testing: " GREEN "%s" RESET "\n", "ON");
   printf("The result of every instruction will be compared with %s. \n"
       "This will help you a lot for debugging, but also significantly reduce the performance. \n"
       "If it is not necessary, you can turn it off in menuconfig.\n", ref_so_file);
