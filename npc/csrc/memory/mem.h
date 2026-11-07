@@ -5,7 +5,7 @@
 // #define CONFIG_MBASE 0
 #define RESET_VECTOR CONFIG_MBASE
 
-#define SERIAL_ADDR 0x10000000U
+#define SERIAL_ADDR 0xa0000000U
 #define RTC_ADDR    0x10000048U
 
 #include <stdint.h>
