@@ -19,8 +19,9 @@ module ysyx_26060173_PCRegister #(DATA_WIDTH = 32)(
 `ifdef ysyx_26060173_SIMULATION
 `ifdef CONFIG_TRACE
 import "DPI-C" function void cpu_get_pc(input int pc);
-always @(posedge clk) begin
-    if(wen) begin
+always @(posedge clk or posedge rst) begin
+    if(rst) cpu_get_pc(d_init);
+    else if(wen) begin
         cpu_get_pc(pc);
     end
     // $display("wen:%x",wen);

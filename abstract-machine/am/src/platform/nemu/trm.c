@@ -20,16 +20,16 @@ void halt(int code) {
 }
 
 void _trm_init() {
-  // union {
-  //   uint32_t vendorid;
-  //   uint8_t id[4];
-  // } u;
-  // uint32_t archid;
-  // asm volatile ("csrr %0, mvendorid" : "=r"(u.vendorid));
-  // asm volatile ("csrr %0, marchid" : "=r"(archid));
-  // printf("My ID is:");
-  // printf("%c%c%c%c_",u.id[3], u.id[2], u.id[1], u.id[0]);
-  // printf("%d\n",archid);
+  union {
+    uint32_t vendorid;
+    uint8_t id[4];
+  } u;
+  uint32_t archid;
+  asm volatile ("csrr %0, mvendorid" : "=r"(u.vendorid));
+  asm volatile ("csrr %0, marchid" : "=r"(archid));
+  printf("My ID is:");
+  printf("%c%c%c%c_",u.id[3], u.id[2], u.id[1], u.id[0]);
+  printf("%d\n",archid);
 
   int ret = main(mainargs);
   halt(ret);

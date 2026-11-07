@@ -94,11 +94,6 @@ void init_difftest(char *ref_so_file, long img_size, int port) {
 //   return true;
 // }
 bool isa_difftest_checkregs(CPU_state *ref_r, int pc) {
-  // printf("ref_r: 0x%08x\n", ref_r->gpr[2]);
-  // printf("ref_r_pc: 0x%08x\n", ref_r->pc);
-  // printf("cpu: 0x%08x\n", cpu.gpr[2]);
-  // printf("pc: 0x%08x\n", pc);
-  // printf("cpu_pc: 0x%08x\n", cpu.pc);
   for(int i = 0; i < NR_GPR; i ++) {
     if(cpu.gpr[i] != ref_r->gpr[i]) {
       printf("[DiffTest] errors at 0x%08x\n" ,pc);
@@ -123,17 +118,32 @@ static void checkregs(CPU_state *ref, int pc) {
 
 extern "C" void difftest_step(int pc, int npc, char clk, char wen) { 
   static bool is_valid = false; // status val
+  static bool count_state = false;
   static int call_count = 0;
+  static char last_clk;
+  static char last_wen;
+  bool is_clk_posedge = false;
+  bool is_start_count = false;
+
+  is_clk_posedge = (last_clk == 0) && (clk == 1);
+  is_start_count = is_clk_posedge && (last_wen == 1);
+  last_clk = clk;
+  last_wen = wen;
   
-  call_count ++;  // call once, inc once
 
   // status transfer
-  switch (call_count & clk & wen) {
-    case 6: is_valid = true; call_count = 0; break;
-    default: is_valid = false; break;
+  if(is_start_count) {
+    count_state = true;
+    is_start_count = false;
+  }
+  if(count_state) 
+  switch (call_count) {
+    case 2: is_valid = true; call_count = 0; count_state = false; break;
+    default: is_valid = false; call_count ++;break;
   }
 
   if(is_valid) {
+  is_valid = false;
   CPU_state ref_r;
 
   if (skip_dut_nr_inst > 0) {
