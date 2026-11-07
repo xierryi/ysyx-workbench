@@ -54,15 +54,15 @@ ysyx_26060173_MuxKey #(3,2, 1) validMux(
     .key(cur_state), .out(ifu_valid),.lut({
         s_idle      , 1'b0,
         s_wait      , ifu_isload ? 1'b0 : 1'b1,
-        s_wait_lsu  , 1'b1
+        s_wait_lsu  , lsu2ifu_ready ? 1'b1 : 1'b0
     }) 
 );
 
 ysyx_26060173_MuxKey #(3,2, 1) ifu2lsu_rvalidMux(
     .key(cur_state), .out(ifu2lsu_rvalid),.lut({
         s_idle      , 1'b0,
-        s_wait      , 1'b1,
-        s_wait_lsu  , 1'b0
+        s_wait      , ifu_isload ? 1'b1 : 1'b0,
+        s_wait_lsu  , 1'b1
     }) 
 );
 

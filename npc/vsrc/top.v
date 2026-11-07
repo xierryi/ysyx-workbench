@@ -49,6 +49,7 @@ wire [31:0] M_wdata;
 wire [31:0] M_rdata;
 wire [31:0] M_raddr; 
 wire [1:0] M_rlen;
+wire lsu_respValid;
 
 // Control Signal
 wire [1:0] Branch;
@@ -235,8 +236,16 @@ ysyx_26060173_LSU u6(
     // .ifu_valid(ifu_valid),
     .ifu2lsu_rvalid(ifu2lsu_rvalid),
     .lsu2ifu_ready(lsu2ifu_ready),
-    .lsu_rdata(M_rdata)
+    .lsu_rdata(M_rdata),
+    .lsu_respValid(lsu_respValid)
 );
+
+ysyx_26060173_DelayCreate u7(
+    .clk(clk),
+    .delay_cycle('d20),
+    .start_frame(ifu2lsu_rvalid),
+    .out(lsu_respValid)
+); 
 
 /* test module */
 // always @(posedge clk) begin
@@ -257,6 +266,7 @@ ysyx_26060173_LSU u6(
     // $display("M_ren: %x", M_ren);
     // $display("ifu_valid: %x", ifu_valid);
     // $display("ifu2lsu_rvalid: %x", ifu2lsu_rvalid);
+    // $display("lsu_respValid:%x", lsu_respValid);
     // $display("lsu2ifu_ready: %x", lsu2ifu_ready);
     // $display("R_wen: %x", R_wen);
 

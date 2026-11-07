@@ -74,7 +74,7 @@ void init_difftest(char *ref_so_file, long img_size, int port) {
   void (*ref_difftest_init)(int) = (void (*)(int))dlsym(handle, "difftest_init");
   assert(ref_difftest_init);
 
-  printf( BOLD BLUE "Differential testing: " GREEN "%s" RESET "\n", "ON");
+  printf( BOLD BLUE "Differential testing: " BLUE "%s" RESET "\n", "ON");
   printf("The result of every instruction will be compared with %s. \n"
       "This will help you a lot for debugging, but also significantly reduce the performance. \n"
       "If it is not necessary, you can turn it off in menuconfig.\n", ref_so_file);
