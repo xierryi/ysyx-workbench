@@ -7,12 +7,14 @@ module ysyx_26060173_LSU(
     input [31:0] lsu_wdata,
     input [31:0] lsu_raddr,
     input [1:0] lsu_rlen,
+    input lsu_reqReady,
     input ifu2lsu_rvalid,
     // input ifu_valid,
     output lsu2ifu_ready,
     output reg [31:0] lsu_rdata,
 
-    input lsu_respValid
+    input lsu_respValid,
+    input lsu_respReady
 );
 
 parameter LEN_1 = 2'b00;
@@ -51,19 +53,22 @@ reg cur_state, next_state;
 always @(posedge clk) begin
     cur_state <= next_state;
     // $display("cur_state: %x",cur_state);
+    // $display("lsu_reqValid: %x",lsu_reqValid);
+    // $display("lsu_reqReady: %x",lsu_reqReady);
+    
 end
 
 ysyx_26060173_MuxKey #(2,1, 1) ST_next_state(
     .key(cur_state), .out(next_state),.lut({
-        s_idle      , lsu_reqValid ? s_wait : s_idle,
-        s_wait      , lsu_respValid ? s_idle : s_wait
+        s_idle      , (lsu_reqValid & lsu_reqReady) ? s_wait : s_idle,
+        s_wait      , (lsu_respValid & lsu_respReady) ? s_idle : s_wait
     }) 
 );
 
 ysyx_26060173_MuxKey #(2,1, 1) lsu2ifu_readyMUX(
     .key(cur_state), .out(lsu2ifu_ready),.lut({
         s_idle      , 1'b0,
-        s_wait      , lsu_respValid ? 1'b1 : 1'b0
+        s_wait      , (lsu_respValid & lsu_respReady) ? 1'b1 : 1'b0
     }) 
 );
 

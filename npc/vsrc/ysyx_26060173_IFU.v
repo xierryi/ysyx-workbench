@@ -11,7 +11,8 @@ module ysyx_26060173_IFU(
 
     input ifu_isload,
     input lsu2ifu_ready,
-    output ifu2lsu_rvalid
+    output ifu2lsu_rvalid,
+    input lsu_reqReady
 
     // async bus // implement later
     // input ready,    // IFU <- IDU
@@ -39,13 +40,16 @@ reg [1:0] cur_state, next_state;
 
 always @(posedge clk) begin
     cur_state <= next_state;
-    // $display("cur_state:%x",cur_state);
+    // $display("ifu:cur_state:%x",cur_state);
+    // $display("ifu_load:%x",ifu_isload);
+    // $display("lsu_reqReady:%x",lsu_reqReady);
+    // $display("lsu2ifu_ready:%x",lsu2ifu_ready);
 end
 
 ysyx_26060173_MuxKey #(3,2, 2) ST_next_state(
     .key(cur_state), .out(next_state),.lut({
         s_idle      , s_wait,
-        s_wait      , ifu_isload ? s_wait_lsu : s_idle,
+        s_wait      , ifu_isload ? (lsu_reqReady ? s_wait_lsu : s_wait) : s_idle,
         s_wait_lsu  , lsu2ifu_ready ? s_idle : s_wait_lsu
     }) 
 );

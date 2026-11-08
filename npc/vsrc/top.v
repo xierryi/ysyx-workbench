@@ -33,6 +33,7 @@ wire [31:0] pc;
 wire ifu_valid;
 wire lsu2ifu_ready;
 wire ifu2lsu_rvalid;
+wire lsu_reqReady;
 
 // regfiles interfaces
 wire [3:0] waddr; 
@@ -50,6 +51,7 @@ wire [31:0] M_rdata;
 wire [31:0] M_raddr; 
 wire [1:0] M_rlen;
 wire lsu_respValid;
+wire lsu_respReady;
 
 // Control Signal
 wire [1:0] Branch;
@@ -146,7 +148,8 @@ ysyx_26060173_IFU u2(
     .ifu_valid(ifu_valid),
     .ifu_isload(M_ren),
     .lsu2ifu_ready(lsu2ifu_ready),
-    .ifu2lsu_rvalid(ifu2lsu_rvalid)
+    .ifu2lsu_rvalid(ifu2lsu_rvalid),
+    .lsu_reqReady(lsu_reqReady)
 );
 
 ysyx_26060173_IDU u3(
@@ -235,21 +238,44 @@ ysyx_26060173_LSU u6(
     .lsu_rlen(M_rlen),
     // .ifu_valid(ifu_valid),
     .ifu2lsu_rvalid(ifu2lsu_rvalid),
+    .lsu_reqReady(lsu_reqReady),
     .lsu2ifu_ready(lsu2ifu_ready),
     .lsu_rdata(M_rdata),
-    .lsu_respValid(lsu_respValid)
+    .lsu_respValid(lsu_respValid),
+    .lsu_respReady(lsu_respReady)
 );
 
-ysyx_26060173_DelayCreate u7(
+/* MEM simulation */
+
+ysyx_26060173_DelayCreate lsu_respValid_gen(
     .clk(clk),
-    .delay_cycle('d20),
+    .delay_cycle('d5),
+    .out_cycle('d5),
     .start_frame(ifu2lsu_rvalid),
     .out(lsu_respValid)
 ); 
 
+ysyx_26060173_DelayCreate lsu_reqReady_gen(
+    .clk(clk),
+    .delay_cycle('d2),
+    .out_cycle('d1),
+    .start_frame(ifu2lsu_rvalid),
+    .out(lsu_reqReady)
+);
+
+ysyx_26060173_DelayCreate lsu_respReady_gen(
+    .clk(clk),
+    .delay_cycle('d9),
+    .out_cycle('d1),
+    .start_frame(ifu2lsu_rvalid),
+    .out(lsu_respReady)
+);
+
 /* test module */
 // always @(posedge clk) begin
 //     $display("PC: %x", pc);
+//     $display("lsu_reqReady:%x",lsu_reqReady);
+//     $display("lsu_respValid:%x",lsu_respValid);
     // $display("inst: %x", inst);
     // $display("rdata1: %x", rdata1);
     // $display("rdata2: %x", rdata2);

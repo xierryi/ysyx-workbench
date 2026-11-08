@@ -2,10 +2,11 @@ module ysyx_26060173_DelayCreate (
     input clk,
     input start_frame, // start delay at end of start_frame (high level is enable )
     input [31:0] delay_cycle,
+    input [31:0] out_cycle, // greater than 0
     output reg out
 );
 
-integer i;
+integer i, j;
 
 parameter IDLE = 1'b0;
 parameter BUSY = 1'b1;
@@ -38,13 +39,17 @@ always @(posedge clk) begin
     else begin
         if(i == delay_cycle - 32'b1) begin
             out <= 1'b1;
-            state <= IDLE;
+            j <= j + 32'b1;
+            if(j == out_cycle - 32'b1) begin 
+                state <= IDLE;
+            end
         end
         else begin
             out <= 1'b0;
+            j <= 32'b0;
+            i <= i + 32'b1;
             state <= BUSY; 
         end
-        i <= i + 32'b1;
     end
 end
 
