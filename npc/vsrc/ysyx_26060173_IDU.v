@@ -1,6 +1,10 @@
 `include "ysyx_26060173_defines.v"
 module ysyx_26060173_IDU(
+    input clk,
+    // handshake: IFU<->IDU
     input [31:0] inst,
+    input ifu2idu_valid,
+    output idu2ifu_ready,
 
     // read from reg 
     input [31:0] rdata1,
@@ -9,6 +13,10 @@ module ysyx_26060173_IDU(
     output [3:0] raddr2,
 
     // output operand and ctrl signal to EXU
+    // handshake: IDU<->EXU
+    output idu2exu_valid,
+    input exu2idu_ready,
+
     output [31:0] src1,
     output [31:0] src2,
     output [31:0] imm,
@@ -20,7 +28,7 @@ module ysyx_26060173_IDU(
     output [1:0] RegIn,
     output ALUIn1Sel,
     output ALUIn2Sel,
-    output R_wen,
+    output R_wen_main,
     output M_wen,
     output M_ren,
     // output EandCSR,
@@ -30,8 +38,6 @@ module ysyx_26060173_IDU(
     output csr,
 
     output [11:0] SR_addr,
-    output SR_csr_wen,
-    output SR_ecall_wen,
 
     output [2:0] funct3,
     output inst_30,
@@ -53,7 +59,6 @@ assign funct3 = inst[14:12];
 assign inst_30 = inst[30];
 
 wire EandCSR;
-wire R_wen_main;
 
 ysyx_26060173_Control u0(
     .opcode(opcode),
@@ -105,11 +110,43 @@ assign src1 = rdata1;
 assign raddr2 = rs2[3:0];
 assign src2 = rdata2;
 
-assign R_wen = R_wen_main | csr;
 
-/* interfaces for SR */
-assign SR_csr_wen = csr;
-assign SR_ecall_wen = ecall;
+// bus status transfer
+parameter s_idle        = 2'b00;
+// parameter s_busy        = 2'b01;
+parameter s_wait        = 2'b10;
+
+reg [1:0] cur_state, next_state;
+
+always @(posedge clk) begin
+    cur_state <= next_state;
+    // $display("idu:cur_state:%x",cur_state);
+end
+
+ysyx_26060173_MuxKey #(2,2, 2) ST_next_state(
+    .key(cur_state), .out(next_state),.lut({
+        s_idle  , (ifu2idu_valid & idu2ifu_ready) ? s_wait : s_idle,
+        // s_busy  , s_wait, 
+        s_wait  , (idu2exu_valid & exu2idu_ready) ? s_idle : s_wait
+    }) 
+);
+
+ysyx_26060173_MuxKey #(2,2, 1) idu2exu_validMUX(
+    .key(cur_state), .out(idu2exu_valid),.lut({
+        s_idle  , 1'b0,
+        // s_busy  , 1'b0,
+        s_wait  , 1'b1
+    }) 
+);
+
+ysyx_26060173_MuxKey #(2,2, 1) idu2ifu_readyMUX(
+    .key(cur_state), .out(idu2ifu_ready),.lut({
+        s_idle  , 1'b1,
+        // s_busy  , 1'b0,
+        s_wait  , 1'b0
+    }) 
+);
+
 
 
 /* TO DO!!! */

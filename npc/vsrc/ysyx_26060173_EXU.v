@@ -3,6 +3,15 @@ module ysyx_26060173_EXU(
     input clk,
     
     // opcode encoded and operand from IDU
+    // handshake IDU<->EXU
+    input idu2exu_valid,
+    output exu2idu_ready,
+
+    input R_wen_main,
+    output R_wen,
+    output SR_csr_wen,
+    output SR_ecall_wen,
+
     input [1:0] Branch,
     input isB_type,
     output B_en,
@@ -30,6 +39,12 @@ module ysyx_26060173_EXU(
     input [31:0] pc,
 
     // Memory interfaces
+    // handshake EXU<->LSU
+    output exu2lsu_valid,
+    input lsu2exu_ready,
+    output exu2lsu_ready,
+    input lsu2exu_valid,
+
     input [31:0] M_rdata,
     output [31:0] M_raddr,
     output [1:0] M_rlen,
@@ -39,6 +54,10 @@ module ysyx_26060173_EXU(
 
 
     // input of WBU
+    // handshake EXU<->WBU
+    output exu2wbu_valid,
+    input wbu2exu_ready,
+
     output [31:0] dst, // dst -> wdata
     output [31:0] dnpc,
     output [31:0] SR_dst // SR_dst->SR_wdata
@@ -139,6 +158,8 @@ ysyx_26060173_MuxKeyWithDefault #(2, 3, 32) M_rdataMUX(
 ); 
 
 /* RegIn Part */
+assign R_wen = R_wen_main | csr;
+
 wire [31:0] dst_main;
 
 ysyx_26060173_MuxKey #(4, 2, 32) RegInMUX(
@@ -157,6 +178,10 @@ ysyx_26060173_MuxKeyWithDefault #(1, 1, 32) dstMUX(
 );
 
 /* SR_wdata part */
+
+assign SR_csr_wen = csr;
+assign SR_ecall_wen = ecall;
+
 ysyx_26060173_MuxKeyWithDefault #(2, 1, 32) SR_dstMUX(
     .key(csr_type), .out(SR_dst), .default_out(32'd0), .lut({
         CSR_CSRRW,   src1,
@@ -183,6 +208,65 @@ ysyx_26060173_MuxKeyWithDefault #(1, 1, 32) dnpcMUX(
     })
 );
 
+// bus status transfer
+parameter s_idle        = 2'b00;
+// parameter s_busy        = 2'b01;
+parameter s_wait_lsu_1  = 2'b01;
+parameter s_wait_lsu_2  = 2'b10;
+parameter s_wait_wbu    = 2'b11;
+
+reg [1:0] cur_state, next_state;
+
+always @(posedge clk) begin
+    cur_state <= next_state;
+    // $display("exu:cur_state:%x",cur_state);
+    // $display("exu:M_en:%x",M_ren | M_wen);
+end
+
+ysyx_26060173_MuxKey #(4,2, 2) ST_next_state(
+    .key(cur_state), .out(next_state),.lut({
+        s_idle      , (idu2exu_valid & exu2idu_ready) ? ((M_ren | M_wen) ? s_wait_lsu_1 : s_wait_wbu) : s_idle,
+        s_wait_lsu_1, (exu2lsu_valid & lsu2exu_ready) ? s_wait_lsu_2 : s_wait_lsu_1,
+        s_wait_lsu_2, (lsu2exu_valid & exu2lsu_ready) ? s_wait_wbu : s_wait_lsu_2,
+        s_wait_wbu  , (exu2wbu_valid & wbu2exu_ready) ? s_idle : s_wait_wbu
+    }) 
+);
+
+ysyx_26060173_MuxKey #(4,2, 1) exu2lsu_validMUX(
+    .key(cur_state), .out(exu2lsu_valid),.lut({
+        s_idle      , 1'b0,
+        s_wait_lsu_1, 1'b1,
+        s_wait_lsu_2, 1'b0,
+        s_wait_wbu,   1'b0
+    }) 
+);
+
+ysyx_26060173_MuxKey #(4,2, 1) exu2lsu_readyMUX(
+    .key(cur_state), .out(exu2lsu_ready),.lut({
+        s_idle      , 1'b0,
+        s_wait_lsu_1, 1'b0,
+        s_wait_lsu_2, 1'b1,
+        s_wait_wbu,   1'b0
+    }) 
+);
+
+ysyx_26060173_MuxKey #(4,2, 1) exu2wbu_validMUX(
+    .key(cur_state), .out(exu2wbu_valid),.lut({
+        s_idle      , 1'b0,
+        s_wait_lsu_1, 1'b0,
+        s_wait_lsu_2, 1'b0,
+        s_wait_wbu,   1'b1
+    }) 
+);
+
+ysyx_26060173_MuxKey #(4,2, 1) exu2idu_readyMUX(
+    .key(cur_state), .out(exu2idu_ready),.lut({
+        s_idle      , 1'b1,
+        s_wait_lsu_1, 1'b0,
+        s_wait_lsu_2, 1'b0,
+        s_wait_wbu,   1'b0
+    }) 
+);
 // always @(posedge clk) begin 
 //     $display("ALUIn1: %x",ALUIn1);
 //     $display("ALUIn2: %x",ALUIn2);
