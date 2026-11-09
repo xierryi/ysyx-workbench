@@ -1,20 +1,25 @@
 module ysyx_26060173_LSU(
     input clk,
-    input lsu_ren,
-    input lsu_wen,
-    input [31:0] lsu_waddr,
     input [1:0] lsu_wlen,
-    input [31:0] lsu_wdata,
-    input [31:0] lsu_raddr,
+    input [31:0] wdata,
     input [1:0] lsu_rlen,
-    input lsu_reqReady,
-    input ifu2lsu_rvalid,
+
+    input [31:0] araddr,    // -+
+    input arvalid,          // AR   //ifu2lsu_rvalid
+    input arready,          // -+
+
     // input ifu_valid,
     output lsu2ifu_ready,
-    output reg [31:0] lsu_rdata,
 
-    input lsu_respValid,
-    input lsu_respReady
+    output reg [31:0] rdata,// -+
+    // output rresp,        //  |
+    input rvalid,           //  R
+    input rready,           // -+ 
+
+    input [31:0] awaddr,    // -+
+    input awvalid           // AW
+    // input awready,       // -+
+
 );
 
 parameter LEN_1 = 2'b00;
@@ -40,10 +45,6 @@ ysyx_26060173_MuxKey #(3, 2, 32) u1(
     })
 );
 
-wire lsu_reqValid;
-
-assign lsu_reqValid = ifu2lsu_rvalid;
-
 // bus status transfer
 parameter s_idle        = 1'b0;
 parameter s_wait        = 1'b1;
@@ -53,22 +54,22 @@ reg cur_state, next_state;
 always @(posedge clk) begin
     cur_state <= next_state;
     // $display("cur_state: %x",cur_state);
-    // $display("lsu_reqValid: %x",lsu_reqValid);
-    // $display("lsu_reqReady: %x",lsu_reqReady);
+    // $display("arvalid: %x",arvalid);
+    // $display("arready: %x",arready);
     
 end
 
 ysyx_26060173_MuxKey #(2,1, 1) ST_next_state(
     .key(cur_state), .out(next_state),.lut({
-        s_idle      , (lsu_reqValid & lsu_reqReady) ? s_wait : s_idle,
-        s_wait      , (lsu_respValid & lsu_respReady) ? s_idle : s_wait
+        s_idle      , (arvalid & arready) ? s_wait : s_idle,
+        s_wait      , (rvalid & rready) ? s_idle : s_wait
     }) 
 );
 
 ysyx_26060173_MuxKey #(2,1, 1) lsu2ifu_readyMUX(
     .key(cur_state), .out(lsu2ifu_ready),.lut({
         s_idle      , 1'b0,
-        s_wait      , (lsu_respValid & lsu_respReady) ? 1'b1 : 1'b0
+        s_wait      , (rvalid & rready) ? 1'b1 : 1'b0
     }) 
 );
 
@@ -79,9 +80,9 @@ import "DPI-C" function void vaddr_write(
   input int waddr, input int wdata, input int len);
 
 always @(posedge clk) begin
-    lsu_rdata <= (!lsu_wen & lsu_ren & lsu_reqValid) ? vaddr_read(lsu_raddr, lsu_rlen_num) : 32'b0;
-    if(lsu_wen) begin
-        vaddr_write(lsu_waddr, lsu_wdata, lsu_wlen_num);
+    rdata <= (!awvalid & arvalid) ? vaddr_read(araddr, lsu_rlen_num) : 32'b0;
+    if(awvalid) begin
+        vaddr_write(awaddr, wdata, lsu_wlen_num);
     end
 end
 

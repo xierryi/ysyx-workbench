@@ -33,6 +33,7 @@ void system_init(int argc, char **argv) {
 	top->trace(tfp, 0);
 	Verilated::mkdir("tracing_logs");
 	tfp->open("tracing_logs/dump.fst");
+  printf(BOLD BLUE"Waveform: ON" RESET "\n");
 #endif
 }
 

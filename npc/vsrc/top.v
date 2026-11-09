@@ -30,10 +30,13 @@ module top(
 // output of IFU module
 wire [31:0] inst;
 wire [31:0] pc;
+wire ifu_arvalid;
+wire ifu_arready;
+wire ifu_rvalid;
+wire ifu_rready;
+
 wire ifu_valid;
 wire lsu2ifu_ready;
-wire ifu2lsu_rvalid;
-wire lsu_reqReady;
 
 // regfiles interfaces
 wire [3:0] waddr; 
@@ -50,8 +53,10 @@ wire [31:0] M_wdata;
 wire [31:0] M_rdata;
 wire [31:0] M_raddr; 
 wire [1:0] M_rlen;
-wire lsu_respValid;
-wire lsu_respReady;
+wire lsu_arvalid;
+wire lsu_arready;
+wire lsu_rvalid;
+wire lsu_rready;
 
 // Control Signal
 wire [1:0] Branch;
@@ -143,13 +148,17 @@ ysyx_26060173_IFU u2(
     // .pc_wen_out(wen_pc), 
     .d_init(d_init_pc),
     .d_pcreg(d_pcreg), 
-    .ifu_raddr(pc),
-    .ifu_rdata(inst),
+    .araddr(pc),
+    .arvalid(ifu_arvalid),
+    .arready(ifu_arready),
+    .rdata(inst),
+    .rvalid(ifu_rvalid),
+    .rready(ifu_rready),
     .ifu_valid(ifu_valid),
     .ifu_isload(M_ren),
     .lsu2ifu_ready(lsu2ifu_ready),
-    .ifu2lsu_rvalid(ifu2lsu_rvalid),
-    .lsu_reqReady(lsu_reqReady)
+    .lsu_arvalid(lsu_arvalid),
+    .lsu_arready(lsu_arready)
 );
 
 ysyx_26060173_IDU u3(
@@ -229,53 +238,76 @@ ysyx_26060173_WBU u5(
 
 ysyx_26060173_LSU u6(
     .clk(clk),
-    .lsu_ren(M_ren),
-    .lsu_wen(M_wen & ifu_valid),
-    .lsu_waddr(M_waddr),
+    .awvalid(M_wen & ifu_valid),
+    .awaddr(M_waddr),
     .lsu_wlen(M_wlen),
-    .lsu_wdata(M_wdata),
-    .lsu_raddr(M_raddr),
+    .wdata(M_wdata),
+    .araddr(M_raddr),
+    .arvalid(lsu_arvalid),
+    .arready(lsu_arready),
     .lsu_rlen(M_rlen),
     // .ifu_valid(ifu_valid),
-    .ifu2lsu_rvalid(ifu2lsu_rvalid),
-    .lsu_reqReady(lsu_reqReady),
     .lsu2ifu_ready(lsu2ifu_ready),
-    .lsu_rdata(M_rdata),
-    .lsu_respValid(lsu_respValid),
-    .lsu_respReady(lsu_respReady)
+    .rdata(M_rdata),
+    .rvalid(lsu_rvalid),
+    .rready(lsu_rready)
 );
 
 /* MEM simulation */
-
-ysyx_26060173_DelayCreate lsu_respValid_gen(
-    .clk(clk),
-    .delay_cycle('d5),
-    .out_cycle('d5),
-    .start_frame(ifu2lsu_rvalid),
-    .out(lsu_respValid)
-); 
-
-ysyx_26060173_DelayCreate lsu_reqReady_gen(
+/* ifu */
+ysyx_26060173_DelayCreate ifu_arready_gen(
     .clk(clk),
     .delay_cycle('d2),
     .out_cycle('d1),
-    .start_frame(ifu2lsu_rvalid),
-    .out(lsu_reqReady)
+    .start_frame(ifu_arvalid),
+    .out(ifu_arready)
 );
 
-ysyx_26060173_DelayCreate lsu_respReady_gen(
+ysyx_26060173_DelayCreate ifu_rvalid_gen(
+    .clk(clk),
+    .delay_cycle('d5),
+    .out_cycle('d2),
+    .start_frame(ifu_arvalid),
+    .out(ifu_rvalid)
+);
+
+ysyx_26060173_DelayCreate ifu_rready_gen(
+    .clk(clk),
+    .delay_cycle('d6),
+    .out_cycle('d1),
+    .start_frame(ifu_arvalid),
+    .out(ifu_rready)
+);
+/* lsu */
+ysyx_26060173_DelayCreate lsu_arready_gen(
+    .clk(clk),
+    .delay_cycle('d2),
+    .out_cycle('d1),
+    .start_frame(lsu_arvalid),
+    .out(lsu_arready)
+);
+
+ysyx_26060173_DelayCreate lsu_rready_gen(
     .clk(clk),
     .delay_cycle('d9),
     .out_cycle('d1),
-    .start_frame(ifu2lsu_rvalid),
-    .out(lsu_respReady)
+    .start_frame(lsu_arvalid),
+    .out(lsu_rready)
 );
+
+ysyx_26060173_DelayCreate lsu_rvalid_gen(
+    .clk(clk),
+    .delay_cycle('d5),
+    .out_cycle('d5),
+    .start_frame(lsu_arvalid),
+    .out(lsu_rvalid)
+); 
 
 /* test module */
 // always @(posedge clk) begin
 //     $display("PC: %x", pc);
-//     $display("lsu_reqReady:%x",lsu_reqReady);
-//     $display("lsu_respValid:%x",lsu_respValid);
+//     $display("arready:%x",arready);
+//     $display("rvalid:%x",rvalid);
     // $display("inst: %x", inst);
     // $display("rdata1: %x", rdata1);
     // $display("rdata2: %x", rdata2);
@@ -291,8 +323,8 @@ ysyx_26060173_DelayCreate lsu_respReady_gen(
     // $display("rlen: %x", M_rlen);
     // $display("M_ren: %x", M_ren);
     // $display("ifu_valid: %x", ifu_valid);
-    // $display("ifu2lsu_rvalid: %x", ifu2lsu_rvalid);
-    // $display("lsu_respValid:%x", lsu_respValid);
+    // $display("arvalid: %x", arvalid);
+    // $display("rvalid:%x", rvalid);
     // $display("lsu2ifu_ready: %x", lsu2ifu_ready);
     // $display("R_wen: %x", R_wen);
 
