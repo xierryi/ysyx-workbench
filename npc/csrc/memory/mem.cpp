@@ -151,7 +151,8 @@ extern "C" void vaddr_write(int waddr, int wdata, int len) {
   /* SERIAL PART */
   if(waddr == SERIAL_ADDR) 
   { 
-    putchar(wdata);   
+    putchar(wdata); // will buffer in stdout!  
+    fflush(stdout); // send out ch in buffer
     return;
   }
 

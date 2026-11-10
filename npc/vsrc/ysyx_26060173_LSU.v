@@ -122,7 +122,7 @@ ysyx_26060173_MuxKey #(5,3, 1) awvalidMUX(
         s_idle      , 1'b0,
         s_busy      , M_wen,
         s_wait_r    , 1'b0,
-        s_wait_w    , M_wen,
+        s_wait_w    , 1'b0,
         s_wait_exu  , 1'b0
     }) 
 );
@@ -154,7 +154,7 @@ import "DPI-C" function void vaddr_write(
   input int waddr, input int wdata, input int len);
 
 always @(posedge clk) begin
-    if(awvalid) begin
+    if(awvalid & awready) begin
         vaddr_write(awaddr, wdata, lsu_wlen_num);
     end
     else if(arvalid) begin
